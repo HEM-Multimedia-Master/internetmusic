@@ -11,7 +11,7 @@ instructor:
   - Luciano Azzigotti
 year: 1
 duration: 14 semaines
-coverImage: ""
+coverImage: https://i.imgur.com/vhpOUsw.png
 tags:
   - internetmusic
   - web-audio
