@@ -1,0 +1,5 @@
+---
+status: published
+---
+
+The default package manager for Node, used to install and manage project dependencies.

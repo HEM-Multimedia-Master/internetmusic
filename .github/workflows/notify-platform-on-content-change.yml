@@ -19,10 +19,10 @@ jobs:
         env:
           CONTENT_BUS_SECRET: ${{ secrets.CONTENT_BUS_SECRET }}
         run: |
-          # Avisamos al Content Bus del Framework (Zero Downtime)
+          # Avisamos al Content Bus del Framework HEM (Zero Downtime)
           # Usamos -sS --fail-with-body para que falle en errores 4xx/5xx pero nos muestre el porqué
           # El '-d @-' es fundamental para leer el JSON del heredoc
-          curl -sS --fail-with-body -X POST https://www.musiki.org.ar/api/webhook/content-update \
+          curl -sS --fail-with-body -X POST https://hem.zztt.org/api/webhook/content-update \
             -H "Authorization: Bearer ${CONTENT_BUS_SECRET}" \
             -H "Content-Type: application/json" \
             -d @- <<JSON

@@ -1,5 +1,0 @@
-#concept 
-
-cybernetics 
-
-[[Gordon Pask]]

@@ -11,15 +11,17 @@ views:
     filters:
       or:
         - file.tags.contains("technologies")
-        - file.folder == "2-technologies"
+        - file.folder == "public/technologies"
     markers: number
     indentProperties: true
   - type: list
     name: concepts
     filters:
       or:
-        - file.tags.contains("concept")
-        - file.folder == "5-concepts"
+        - |-
+          file.tags.contains("
+          concept")
+        - file.folder == "public/concepts"
     markers: number
     indentProperties: true
   - type: list
