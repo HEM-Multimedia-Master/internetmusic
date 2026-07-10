@@ -1,6 +1,6 @@
 ---
 type: hemworks
-img: ![](https://i.imgur.com/RGt66ev.png)
+img: "https://i.imgur.com/RGt66ev.png"
 year: 2025
 tags:
   - complexmusic
