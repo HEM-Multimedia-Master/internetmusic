@@ -1,0 +1,11 @@
+# Public notes require teaching and editorial review.
+/public/ @HEM-Multimedia-Master/docentes-multimedia @HEM-Multimedia-Master/editorial
+
+# Course-private and draft material stay with the teaching team.
+/cursos/ @HEM-Multimedia-Master/docentes-multimedia
+/draft/ @HEM-Multimedia-Master/docentes-multimedia
+
+# Repo automation and governance stay with developers.
+/.github/workflows/ @HEM-Multimedia-Master/devs
+/CODEOWNERS @HEM-Multimedia-Master/devs
+/README.md @HEM-Multimedia-Master/devs
