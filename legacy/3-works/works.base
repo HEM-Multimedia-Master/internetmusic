@@ -1,0 +1,56 @@
+filters:
+  and:
+    - file.ext != "base"
+views:
+  - type: cards
+    name: Internet Music Works
+    filters:
+      and:
+        - file.folder == "10-teaching/internetmusic/3-works"
+    groupBy:
+      property: tags
+      direction: ASC
+    order:
+      - file.name
+      - person
+      - year
+    sort:
+      - property: year
+        direction: ASC
+    image: note.img
+    cardSize: 160
+    imageAspectRatio: 0.55
+  - type: cards
+    name: Expanded music
+    filters:
+      and:
+        - file.folder == "3-works/expanded music"
+    order:
+      - file.name
+      - person
+      - year
+      - materials
+    rowHeight: medium
+    image: note.img
+    imageAspectRatio: 0.25
+    cardSize: 320
+  - type: cards
+    name: HEM IM works
+    filters:
+      and:
+        - file.folder == "3-works/hem"
+    order:
+      - file.name
+      - person
+      - year
+      - tags
+    image: note.img
+  - type: list
+    name: full list
+    filters:
+      or:
+        - file.folder == "5-concepts"
+        - file.folder == "2-technologies"
+    nestedProperties: true
+    separator: " type"
+    markers: number

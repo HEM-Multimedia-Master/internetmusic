@@ -1,0 +1,31 @@
+views:
+  - type: list
+    name: designpatterns
+    filters:
+      and:
+        - file.tags.contains("designpattern")
+    markers: number
+    indentProperties: true
+  - type: list
+    name: technologies
+    filters:
+      or:
+        - file.tags.contains("technologies")
+        - file.folder == "2-technologies"
+    markers: number
+    indentProperties: true
+  - type: list
+    name: concepts
+    filters:
+      or:
+        - file.tags.contains("concept")
+        - file.folder == "5-concepts"
+    markers: number
+    indentProperties: true
+  - type: list
+    name: glossary
+    filters:
+      and:
+        - file.tags.contains("glossary")
+    markers: number
+    indentProperties: true

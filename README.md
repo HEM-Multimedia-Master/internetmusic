@@ -1,6 +1,6 @@
-# Musique et Technologie
+# Internet Music
 
-Ce dépôt est la source de référence du vault Obsidian et des contenus LMS pour `Musique et Technologie`.
+Ce dépôt est la source de référence du vault Obsidian et des contenus LMS pour `Internet Music`.
 
 ## Structure
 
@@ -29,13 +29,13 @@ Optionnel seulement si vous conservez aussi un workflow legacy `repository_dispa
 
 ## Équipes
 
-- Équipe pédagogique : `@HEM-Multimedia-Master/docentes-multimedia`
+- Équipe pédagogique : `@HEM-Multimedia-Master/docentes-internetmusic`
 - Équipe éditoriale : `@HEM-Multimedia-Master/editorial`
 - Développement : `@HEM-Multimedia-Master/devs`
 
 ## Premières tâches après le scaffold
 
-1. Remplacer les notes d'exemple sous `cursos/multimedia/`.
+1. Remplacer les notes d'exemple sous `cursos/internetmusic/`.
 2. Confirmer que `CODEOWNERS` correspond aux vraies équipes GitHub.
 3. Protéger `main` avec revues obligatoires pour `public/**`.
 4. Enregistrer ce dépôt comme source dans le manifest du framework.
