@@ -38,31 +38,41 @@ Topics range from the philosophical basis of networked systems to advanced appli
 The course is project-driven. Participants maintain individual online repositories (GitHub or Gitpod) to enable collective access and exchange. Each participant may contribute one research presentation during the term, addressing performative, technical, or conceptual aspects of the material, with documentation shared through the participatory web-audio wiki.  Assessment is based on the creation of Internet Music Instruments (IMI), systems, and conceptual frameworks, with the expectation that the work developed will be integrated to the final Master’s project.
 <!--/lang-->
 
-## schedule 25-26
+## schedule 26-27
 
 ### online → Friday 9-11 AM
 
-**2025**
-17/10
-31/10  game theory
-28/11  code fmsynth 
-12/12  code  mic interface socket
 
-**2026** 
-23/01 simulation
-27/02
-13/03
-17/04
-24/04
-15/05
-22/05
-29/05
-19/06
+|fecha|tema proyectado|
+|---|---|
+|sept 18, 2026|intro: internet culture, del pensamiento algorítmico a la indeterminación|
+|oct 2, 2026|setup: Web Audio API, GitHub, Vercel|
+|oct 16, 2026|gamification 1|
+|oct 30, 2026|design patterns 1|
+|nov 13, 2026|agentic / im coding 1: introducción a agentic music|
+|nov 27, 2026|agentic / im coding 2: arquitecturas de agentes, policies con LLM|
+|dec 4, 2026|interfaces & socket: performance en red, websockets|
+|dec 11, 2026|protocolos: MIDI, OSC, node|
+|jan 15, 2027|machine learning 1|
+|fev 26, 2027|gamification 2|
+|mar 5, 2027|design patterns 2|
+|mar 19, 2027|machine learning 2, mediapipe|
+|avr 9, 2027|avatares, rigging, voces artificiales, chatbots|
+|avr 23, 2027|environments: stages, levels, agonística|
+|mai 7, 2027|embedded instrumental devices 1: organología especulativa, diseño paramétrico, impresión 3D|
+|mai 21, 2027|embedded instrumental devices 2: sensores, microcontroladores, MIDI físico|
+|mai 28, 2027|AI 3: data crawling y structured responses|
+|jun 4, 2027|live coding|
+|jun 11, 2027|lighting & stage, hacia una teoría de la hyperperformance|
+|jun 18, 2027|presentación de proyectos 1|
+|juil 2, 2027|presentación de proyectos 2, cierre|
+
+
 
 ### presential @HEMDufour →  Friday 10-13
 
-03/10/2025
-12/06/2026
+20/11/2026
+
 
 ## course objectives
 

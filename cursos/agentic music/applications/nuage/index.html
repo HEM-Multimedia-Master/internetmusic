@@ -1,0 +1,24 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nuage appris · Agentic Music</title><link rel="stylesheet" href="../commun/style.css"></head><body><main>
+<a href="../index.html">← Instruments</a><p class="eyebrow">02 · EXEMPLES ET GRAINS</p><h1>Nuage appris</h1><p>Vos exemples apprennent au modèle ce que vous appelez calme, actif ou dense. Ces noms orientent la texture ; ils ne décrivent pas une émotion détectée.</p>
+<div class="toolbar"><button id="demo">Charger la démo</button><button id="record" class="secondary">Capturer 4 s au micro</button><button id="play">Jouer les grains</button><button id="stop" class="danger">Arrêter tout</button><button id="fullscreen" class="secondary">Plein écran</button></div>
+<p id="status" role="status" aria-live="polite">Charger un son pour commencer. Le micro reste éteint jusqu’à votre demande.</p>
+<div class="controls"><section class="panel"><h2>1 · Choisir la matière</h2>
+<label>Importer MP3 ou WAV (20 Mo, 60 s maximum)<input id="file" type="file" accept="audio/mpeg,audio/wav,.mp3,.wav"></label>
+<canvas id="wave" width="700" height="100" aria-label="Forme d’onde du son"></canvas>
+<label>Position <output id="positionValue">0.00 s</output><input id="position" type="range" min="0" max="1" step="0.001" value="0"></label>
+<div id="pad" class="pad"><span>X : position · Y : volume</span><i class="cross"></i></div>
+<label>Volume <input id="volume" type="range" min="0" max="0.35" step="0.01" value="0.15"></label>
+<button id="listen" class="secondary">Écouter ce fragment</button></section>
+<section class="panel"><h2>2 · Enseigner et jouer</h2>
+<label>Étiquette <select id="label"><option value="calme">Calme</option><option value="actif">Actif</option><option value="dense">Dense</option></select></label>
+<button id="teach">Ajouter ce fragment comme exemple</button><button id="reset" class="secondary">Effacer les exemples</button>
+<p id="training">0 exemple · au moins deux catégories nécessaires</p>
+<label><input type="checkbox" id="assist"> Utiliser le modèle appris</label>
+<label>Taille manuelle des grains (ms)<input id="size" type="range" min="25" max="220" step="5" value="100"></label>
+<label>Densité manuelle (grains/s)<input id="density" type="range" min="2" max="24" step="1" value="8"></label>
+<label>Vitesse manuelle de lecture<input id="rate" type="range" min="0.5" max="2" step="0.05" value="1"></label>
+<div id="hud" class="hud">modèle : en attente</div>
+<details><summary>Centroïdes appris et limites</summary><pre id="centres">[]</pre><p>Le modèle mesure amplitude et passages par zéro. Il ne reconnaît ni instruments ni émotions. La distance n’est pas une probabilité de confiance. Au-delà de 3 unités de distance, les paramètres manuels reprennent la main.</p></details></section></div>
+<div class="toolbar"><button id="export">Exporter la scène en WAV (12 s)</button><button id="sample" class="secondary">Exporter la source en WAV</button><button id="model" class="secondary">Exporter le modèle JSON</button></div>
+<p class="notice">L’export de scène rend 12 secondes avec la position et les réglages actuels. Il ne reproduit pas la trajectoire de vos gestes. Importer une nouvelle source efface les exemples.</p><footer>Démo originale : sinus, son harmonique et bruit. Aucun téléchargement de modèle ni appel API.</footer>
+</main><script type="module" src="app.js"></script></body></html>

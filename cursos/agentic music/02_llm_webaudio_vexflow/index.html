@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic music: language model, Web Audio, VexFlow</title>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<style>
+:root{--bg:#14161a;--panel:#1d2026;--ink:#e8e6e1;--mute:#9a9a96;--acc:#e0a24a;--line:#2d313a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:1.4rem;font-weight:600;margin:0 0 4px}
+h2{font-size:1rem;font-weight:600;margin:0 0 10px;color:var(--acc)}
+p.lead{color:var(--mute);margin:0 0 20px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+textarea,input[type=text],input[type=number],select{background:#101216;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;width:100%}
+textarea{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+button{background:#2a2e37;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 12px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{border-color:var(--acc);color:var(--acc)}
+button.primary{background:var(--acc);color:#1a1a1a;border-color:var(--acc)}
+a{color:var(--acc)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.field{flex:1 1 180px}
+label.s{display:block;font-size:12px;color:var(--mute)}
+label.s output{float:right;color:var(--ink)}
+input[type=range]{width:100%}
+.stage{position:relative;background:#f5f1e8;border-radius:6px;overflow-x:auto;min-height:60px;margin-top:8px}
+.playhead{position:absolute;width:2px;background:#c0392b;opacity:.75;display:none;pointer-events:none}
+#status{font-size:13px;color:var(--mute);margin-top:8px;white-space:pre-wrap}
+canvas{width:100%;height:70px;background:#101216;border-radius:6px;margin-top:10px}
+.note{font-size:12px;color:var(--mute);margin:6px 0 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Agentic music: language model, Web Audio, VexFlow</h1>
+<p class="lead">A free chat model writes a score as JSON. This page parses it, sequences it, synthesizes it and notates it. No API key, no server.</p>
+
+<section>
+<h2>1. Prompt for a free chat</h2>
+<div class="row">
+  <div class="field" style="flex:3 1 300px"><label class="s">Brief (any language)</label><input type="text" id="desc" value="a slow, slightly unstable melody that rises and never resolves"></div>
+  <div class="field"><label class="s">Bars</label><select id="pbars"><option>2</option><option selected>4</option><option>8</option></select></div>
+  <div class="field"><label class="s">Key</label><select id="pkey"></select></div>
+</div>
+<textarea id="prompt" rows="12" readonly></textarea>
+<div class="row">
+  <button id="copyPrompt" class="primary">Copy prompt</button>
+  <span class="note">Paste it in a free chat, then copy the reply:
+    <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>,
+    <a href="https://chat.deepseek.com" target="_blank" rel="noopener">DeepSeek</a>,
+    <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>.
+    Do not paste personal data.</span>
+</div>
+</section>
+
+<section>
+<h2>2. Paste the reply</h2>
+<div class="row" id="tabs"></div>
+<textarea id="reply" rows="10" spellcheck="false" placeholder="Paste the model reply here. Text around the JSON object is ignored."></textarea>
+<div class="row">
+  <button id="render">Parse and notate</button>
+  <button id="loadDemo">Demo score</button>
+  <button id="loadRandom">Random baseline (no model)</button>
+</div>
+<div id="status"></div>
+</section>
+
+<section>
+<h2>3. Synthesis and sequencing</h2>
+<div class="grid">
+  <div><label class="s">Waveform</label>
+    <select id="wave"><option>sawtooth</option><option>square</option><option>triangle</option><option>sine</option></select></div>
+  <div><label class="s">Tempo (BPM)</label><input type="number" id="tempo" min="40" max="220" value="100"></div>
+</div>
+<div class="grid" id="sliders" style="margin-top:12px"></div>
+<div class="row">
+  <button id="play" class="primary">Play</button>
+  <button id="stop">Stop</button>
+  <label><input type="checkbox" id="loop" checked> loop</label>
+  <label><input type="checkbox" id="mel" checked> melody</label>
+  <label><input type="checkbox" id="drm" checked> drums</label>
+</div>
+<canvas id="scope" width="1000" height="70"></canvas>
+</section>
+
+<section>
+<h2>4. Notation</h2>
+<div class="stage" id="melody"></div>
+<div class="stage" id="drums"></div>
+<p class="note">Drum staff: kick on f4, snare on c5, hi-hat on g5. Melody and drums share the playhead position. VexFlow is loaded from a CDN: an internet connection is needed.</p>
+</section>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+
+/* ---------- score model ---------- */
+const DUR = {4:'w', 3:'hd', 2:'h', 1.5:'qd', 1:'q', 0.75:'8d', 0.5:'8', 0.25:'16'};
+const ALLOWED = [4, 3, 2, 1.5, 1, 0.75, 0.5, 0.25];
+const SEMI = {c:0, d:2, e:4, f:5, g:7, a:9, b:11};
+const KEYS = ['C','G','D','A','E','F','Bb','Eb','Am','Em','Bm','Dm','Gm','Cm'];
+
+function parsePitch(s) {
+  if (typeof s !== 'string') return null;
+  const m = s.trim().toLowerCase().match(/^([a-g])(#{0,2}|b{0,2})(-?\d)$/);
+  if (!m) return null;
+  const acc = m[2] === '' ? 0 : (m[2][0] === '#' ? m[2].length : -m[2].length);
+  const midi = 12 * (+m[3] + 1) + SEMI[m[1]] + acc;
+  return {midi, freq: 440 * Math.pow(2, (midi - 69) / 12), key: `${m[1]}${m[2]}/${m[3]}`};
+}
+
+function decompose(x) {
+  const out = [];
+  for (const a of ALLOWED) while (x >= a - 1e-9) { out.push(a); x -= a; }
+  return out;
+}
+
+function toBars(melody, warn) {
+  const bars = []; let cur = [], used = 0;
+  const push = (p, d) => {
+    cur.push({p, d, beat: bars.length * 4 + used});
+    used += d;
+    if (used >= 4 - 1e-9) { bars.push(cur); cur = []; used = 0; }
+  };
+  melody.forEach((item, i) => {
+    const [ps, ds] = Array.isArray(item) ? item : [item.p ?? item.pitch ?? item.note, item.d ?? item.dur ?? item.beats];
+    const p = parsePitch(ps);
+    let remain = Number(ds);
+    if (!(remain > 0)) { warn.push(`melody item ${i}: invalid duration, skipped`); return; }
+    if (!p && String(ps).trim().toLowerCase() !== 'r') warn.push(`melody item ${i}: "${ps}" read as a rest`);
+    if (!ALLOWED.includes(remain)) warn.push(`melody item ${i}: duration ${remain} is not supported, split into allowed values`);
+    const room = 4 - used;
+    if (remain > room + 1e-9) { warn.push(`melody item ${i}: crosses a barline, truncated (ties are not supported)`); remain = room; }
+    decompose(remain).forEach(part => push(p, part));
+  });
+  if (cur.length) decompose(4 - used).forEach(part => push(null, part));
+  if (!bars.length) bars.push([{p: null, d: 4, beat: 0}]);
+  return bars;
+}
+
+function pattern(s) {
+  let t = String(s || '').replace(/[\s|]/g, '').replace(/1/g, 'x').replace(/[^xX]/g, '.');
+  if (!t) t = '.';
+  return t.padEnd(Math.ceil(t.length / 16) * 16, '.');
+}
+
+function normalize(o) {
+  const warnings = [];
+  const key = /^[A-G][#b]?m?$/.test(o.key || '') ? o.key : 'C';
+  const bars = toBars(Array.isArray(o.melody) ? o.melody : [], warnings);
+  const d = o.drums || {};
+  const drums = {kick: pattern(d.kick), snare: pattern(d.snare), hat: pattern(d.hat)};
+  const drumBars = Math.max(...Object.values(drums).map(s => s.length)) / 16;
+  return {
+    title: String(o.title || 'untitled'),
+    tempo: Math.min(220, Math.max(40, Number(o.tempo) || 100)),
+    key, bars, drums, warnings,
+    loopBars: Math.max(bars.length, drumBars)
+  };
+}
+
+function parseReply(text) {
+  const i = text.indexOf('{'), j = text.lastIndexOf('}');
+  if (i < 0 || j < i) throw new Error('no JSON object found');
+  return JSON.parse(text.slice(i, j + 1));
+}
+
+/* ---------- prompt ---------- */
+KEYS.forEach(k => $('#pkey').add(new Option(k)));
+
+function buildPrompt() {
+  const bars = +$('#pbars').value, key = $('#pkey').value;
+  const desc = $('#desc').value.trim() || 'a calm melody';
+  const ex = {title: 'example', tempo: 96, key, melody: [['d4',1],['f4',0.5],['a4',0.5],['g4',2]],
+              drums: {kick: 'X...x..x..X.x...', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.'}};
+  $('#prompt').value = [
+    'Write a short musical idea as ONE JSON object and nothing else: no explanation, no markdown fences.',
+    '',
+    `Brief: ${desc}`,
+    `Length: ${bars} bars in 4/4. Key: ${key}.`,
+    '',
+    'Schema:',
+    `{"title": string, "tempo": number between 40 and 220, "key": "${key}",`,
+    ' "melody": [[pitch, beats], ...],',
+    ' "drums": {"kick": string, "snare": string, "hat": string}}',
+    '',
+    'Rules:',
+    '- pitch is a note name such as c4, f#4, bb3, between c3 and c6, or "r" for a rest. One voice only.',
+    '- beats is one of 4, 3, 2, 1.5, 1, 0.75, 0.5, 0.25. Each bar must add up to exactly 4 beats, so the melody totals ' + (bars * 4) + ' beats.',
+    `- Each drum string has exactly ${bars * 16} characters, one per sixteenth note: "x" soft hit, "X" accent, "." silence.`,
+    '- No triplets, no ties, no chords.',
+    '',
+    'Example of a valid answer for ONE bar:',
+    JSON.stringify(ex)
+  ].join('\n');
+}
+['#desc', '#pbars', '#pkey'].forEach(s => $(s).addEventListener('input', buildPrompt));
+$('#copyPrompt').onclick = async () => {
+  try { await navigator.clipboard.writeText($('#prompt').value); setStatus('Prompt copied.'); }
+  catch { $('#prompt').select(); setStatus('Select all and copy manually.'); }
+};
+
+/* ---------- slots ---------- */
+const slotNames = ['ChatGPT', 'DeepSeek', 'Claude'];
+const slots = ['', '', ''];
+let cur = 0, score = null, dirty = true;
+
+slotNames.forEach((n, i) => {
+  const b = document.createElement('button');
+  b.textContent = n; b.dataset.i = i;
+  b.onclick = () => {
+    slots[cur] = $('#reply').value; cur = i; $('#reply').value = slots[cur];
+    [...$('#tabs').children].forEach((c, k) => c.classList.toggle('on', k === i));
+    dirty = true;
+    if (slots[cur].trim()) load({keepTempo: false}); else setStatus('Empty slot.');
+  };
+  $('#tabs').append(b);
+});
+$('#tabs').children[0].classList.add('on');
+$('#reply').addEventListener('input', () => { dirty = true; });
+
+const fmt = o => `{\n "title": ${JSON.stringify(o.title)},\n "tempo": ${o.tempo},\n "key": ${JSON.stringify(o.key)},\n "melody": ${JSON.stringify(o.melody)},\n "drums": ${JSON.stringify(o.drums)}\n}`;
+
+$('#loadDemo').onclick = () => {
+  $('#reply').value = fmt({title: 'demo', tempo: 92, key: 'Dm',
+    melody: [['d4',1],['f4',0.5],['a4',0.5],['g4',1],['f4',1],['e4',1.5],['d4',0.5],['c#4',1],['d4',1]],
+    drums: {kick: 'X...x..x..X.x...', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.'}});
+  load({keepTempo: false});
+};
+
+const euclid = (k, n) => Array.from({length: n}, (_, i) => ((i * k) % n) < k ? 'x' : '.').join('');
+$('#loadRandom').onclick = () => {
+  const pool = ['c4','eb4','f4','g4','bb4','c5'], durs = [1, 0.5, 0.5, 0.25, 0.25, 1, 2];
+  const mel = []; let beats = 0, idx = 2;
+  while (beats < 8) {
+    const room = 4 - (beats % 4), ok = durs.filter(d => d <= room);
+    const d = ok[Math.floor(Math.random() * ok.length)];
+    idx = Math.max(0, Math.min(pool.length - 1, idx + Math.floor(Math.random() * 3) - 1));
+    mel.push(Math.random() < 0.15 ? ['r', d] : [pool[idx], d]);
+    beats += d;
+  }
+  $('#reply').value = fmt({title: 'random baseline', tempo: 96, key: 'Cm', melody: mel,
+    drums: {kick: euclid(5, 16), snare: '....x.......x...', hat: euclid(9, 16)}});
+  load({keepTempo: false});
+};
+$('#render').onclick = () => load({keepTempo: false});
+
+function setStatus(t) { $('#status').textContent = t; }
+
+function load({keepTempo}) {
+  if (!$('#reply').value.trim()) { setStatus('Paste a JSON reply first.'); return false; }
+  try { score = normalize(parseReply($('#reply').value)); }
+  catch (e) { setStatus('Parse error: ' + e.message); return false; }
+  if (!keepTempo) $('#tempo').value = Math.round(score.tempo);
+  dirty = false;
+  render();
+  setStatus(`"${score.title}": ${score.bars.length} melody bar(s), loop of ${score.loopBars} bar(s), key ${score.key}.` +
+    (score.warnings.length ? '\nNormalizer changed the input:\n- ' + score.warnings.join('\n- ') : ''));
+  return true;
+}
+
+/* ---------- notation (VexFlow) ---------- */
+let mapM = [], mapD = [], phM = null, phD = null;
+
+function drawSystem(el, bars, o) {
+  const {Renderer, Stave, Voice, Formatter, Beam, Accidental} = Vex.Flow;
+  el.innerHTML = '';
+  const host = document.createElement('div'); el.append(host);
+  const W = Math.max(360, el.clientWidth - 4), extra = 90;
+  const perRow = Math.max(1, Math.floor((W - extra - 10) / o.barW));
+  const rows = Math.ceil(bars.length / perRow);
+  const r = new Renderer(host, Renderer.Backends.SVG);
+  r.resize(W, rows * o.rowH + 20);
+  const ctx = r.getContext(), map = [];
+  bars.forEach((bar, i) => {
+    const row = Math.floor(i / perRow), col = i % perRow;
+    const x = 5 + col * o.barW + (col > 0 ? extra : 0), w = o.barW + (col === 0 ? extra : 0), y = row * o.rowH + 10;
+    const st = new Stave(x, y, w);
+    if (col === 0) { st.addClef(o.clef); if (o.key) st.addKeySignature(o.key); }
+    if (i === 0) st.addTimeSignature('4/4');
+    st.setContext(ctx).draw();
+    const notes = bar.map(o.note);
+    const voice = new Voice({num_beats: 4, beat_value: 4}).setStrict(false);
+    voice.addTickables(notes);
+    if (o.key) Accidental.applyAccidentals([voice], o.key);
+    new Formatter().joinVoices([voice]).format([voice], st.getNoteEndX() - st.getNoteStartX() - 12);
+    voice.draw(ctx, st);
+    Beam.generateBeams(notes, o.beams).forEach(b => b.setContext(ctx).draw());
+    notes.forEach((n, k) => map.push({beat: bar[k].beat, x: n.getAbsoluteX() - 3, y: y - 4, h: o.rowH - 14}));
+  });
+  return map;
+}
+
+function melodyNote(n) {
+  const {StaveNote, Dot} = Vex.Flow, dur = DUR[n.d];
+  const sn = n.p ? new StaveNote({keys: [n.p.key], duration: dur, clef: 'treble'})
+                 : new StaveNote({keys: ['b/4'], duration: dur + 'r', clef: 'treble'});
+  if (dur.includes('d')) Dot.buildAndAttach([sn], {all: true});
+  if (n.p) sn.autoStem();
+  return sn;
+}
+
+function drumNote(hatKey) {
+  return s => {
+    const {StaveNote} = Vex.Flow;
+    const keys = [];
+    if (s.k) keys.push('f/4');
+    if (s.s) keys.push('c/5');
+    if (s.h) keys.push(hatKey);
+    if (!keys.length) return new StaveNote({keys: ['b/4'], duration: '16r', clef: 'percussion'});
+    const sn = new StaveNote({keys, duration: '16', clef: 'percussion'});
+    sn.setStemDirection(1);
+    return sn;
+  };
+}
+
+function drumBars() {
+  const hit = (name, s) => { const p = score.drums[name]; const c = p[s % p.length]; return c === 'x' || c === 'X'; };
+  return Array.from({length: score.loopBars}, (_, b) => Array.from({length: 16}, (_, i) => {
+    const s = b * 16 + i;
+    return {beat: s * 0.25, k: hit('kick', s), s: hit('snare', s), h: hit('hat', s)};
+  }));
+}
+
+function render() {
+  if (!score) return;
+  let err = null;
+  mapM = []; mapD = [];
+  for (const key of [score.key, 'C']) {
+    try {
+      mapM = drawSystem($('#melody'), score.bars, {barW: 240, rowH: 130, clef: 'treble', key, note: melodyNote});
+      err = null; break;
+    } catch (e) { err = e; }
+  }
+  if (err) $('#melody').textContent = 'VexFlow error (melody): ' + err.message;
+  for (const hk of ['g/5/x2', 'g/5/x', 'g/5']) {
+    try {
+      mapD = drawSystem($('#drums'), drumBars(), {barW: 470, rowH: 120, clef: 'percussion', key: null,
+        note: drumNote(hk), beams: {groups: [new Vex.Flow.Fraction(1, 4)]}});
+      err = null; break;
+    } catch (e) { err = e; }
+  }
+  if (err) $('#drums').textContent = 'VexFlow error (drums): ' + err.message;
+  phM = document.createElement('div'); phM.className = 'playhead'; $('#melody').append(phM);
+  phD = document.createElement('div'); phD.className = 'playhead'; $('#drums').append(phD);
+}
+
+let rt = null;
+window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 200); });
+
+/* ---------- synthesis (Web Audio) ---------- */
+const SLIDERS = [
+  ['att', 'attack (s)', 0.001, 0.5, 0.001, 0.01],
+  ['dec', 'decay (s)', 0.01, 1, 0.01, 0.15],
+  ['sus', 'sustain', 0, 1, 0.01, 0.5],
+  ['rel', 'release (s)', 0.01, 2, 0.01, 0.25],
+  ['cut', 'filter cutoff (Hz)', 200, 12000, 10, 3000],
+  ['res', 'filter Q', 0.1, 20, 0.1, 1],
+  ['dtime', 'delay time (s)', 0.05, 0.8, 0.01, 0.28],
+  ['dfb', 'delay feedback', 0, 0.85, 0.01, 0.35],
+  ['dmix', 'delay mix', 0, 1, 0.01, 0.25],
+  ['swing', 'swing', 0, 1, 0.01, 0],
+  ['vol', 'master volume', 0, 1, 0.01, 0.6]
+];
+const P = {wave: 'sawtooth'};
+SLIDERS.forEach(([id, label, min, max, step, val]) => {
+  P[id] = val;
+  const l = document.createElement('label'); l.className = 's';
+  l.innerHTML = `${label}<output>${val}</output><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}">`;
+  $('#sliders').append(l);
+  l.querySelector('input').addEventListener('input', e => {
+    P[id] = +e.target.value; l.querySelector('output').textContent = P[id]; applyFx();
+  });
+});
+$('#wave').addEventListener('input', e => { P.wave = e.target.value; });
+
+let ctx, master, analyser, delay, fb, send, noise;
+
+function initAudio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  master = ctx.createGain(); analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
+  master.connect(analyser); analyser.connect(ctx.destination);
+  delay = ctx.createDelay(1); fb = ctx.createGain(); send = ctx.createGain();
+  send.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(master);
+  noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const d = noise.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  applyFx();
+}
+
+function applyFx() {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  master.gain.setTargetAtTime(P.vol, t, 0.02);
+  delay.delayTime.setTargetAtTime(P.dtime, t, 0.02);
+  fb.gain.setTargetAtTime(P.dfb, t, 0.02);
+  send.gain.setTargetAtTime(P.dmix, t, 0.02);
+}
+
+function voice(t, freq, dur) {
+  const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  o.type = P.wave; o.frequency.setValueAtTime(freq, t);
+  f.type = 'lowpass'; f.frequency.setValueAtTime(P.cut, t); f.Q.setValueAtTime(P.res, t);
+  const peak = 0.3, sus = peak * P.sus + 0.0001, hold = Math.max(dur, P.att + P.dec);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(peak, t + P.att);
+  g.gain.linearRampToValueAtTime(sus, t + P.att + P.dec);
+  g.gain.setValueAtTime(sus, t + hold);
+  g.gain.linearRampToValueAtTime(0.0001, t + hold + P.rel);
+  o.connect(f); f.connect(g); g.connect(master); g.connect(send);
+  o.start(t); o.stop(t + hold + P.rel + 0.05);
+}
+
+function kick(t, v) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+  g.gain.setValueAtTime(0.9 * v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.4);
+}
+function noiseHit(t, v, type, freq, len, peak) {
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noise; f.type = type; f.frequency.value = freq;
+  g.gain.setValueAtTime(peak * v, t); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + len + 0.02);
+}
+function snare(t, v) {
+  noiseHit(t, v, 'highpass', 1500, 0.18, 0.5);
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(190, t);
+  g.gain.setValueAtTime(0.35 * v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.12);
+}
+const hat = (t, v) => noiseHit(t, v, 'highpass', 7000, 0.05, 0.25);
+
+/* ---------- sequencing: lookahead scheduler ---------- */
+const AHEAD = 0.2, TICK_MS = 25;
+let playing = false, timer = null, ev = [], idx = 0, loopStart = 0, loopSpb = 0.5, loopBeats = 8, markers = [], curBeat = 0;
+
+function buildEvents() {
+  const out = [];
+  score.bars.forEach(bar => bar.forEach(n => { if (n.p) out.push({beat: n.beat, type: 'n', freq: n.p.freq, d: n.d}); }));
+  for (let s = 0; s < score.loopBars * 16; s++) {
+    for (const [name, type] of [['kick', 'k'], ['snare', 's'], ['hat', 'h']]) {
+      const p = score.drums[name], c = p[s % p.length];
+      if (c === 'x' || c === 'X') out.push({beat: s * 0.25, type, vel: c === 'X' ? 1 : 0.65});
+    }
+    out.push({beat: s * 0.25, type: 'tick'});
+  }
+  return out.sort((a, b) => a.beat - b.beat);
+}
+
+const swung = e => e.type !== 'tick' && Math.abs((e.beat % 0.5) - 0.25) < 1e-9 ? P.swing * 0.1 : 0;
+
+function fire(e, t) {
+  if (e.type === 'tick') { markers.push({t, beat: e.beat}); return; }
+  if (e.type === 'n') { if ($('#mel').checked) voice(t, e.freq, e.d * loopSpb * 0.92); return; }
+  if (!$('#drm').checked) return;
+  ({k: kick, s: snare, h: hat})[e.type](t, e.vel);
+}
+
+function tick() {
+  while (true) {
+    const e = ev[idx];
+    const t = loopStart + (e.beat + swung(e)) * loopSpb;
+    if (t > ctx.currentTime + AHEAD) break;
+    fire(e, t);
+    if (++idx >= ev.length) {
+      idx = 0;
+      loopStart += loopBeats * loopSpb;
+      loopSpb = 60 / (+$('#tempo').value || score.tempo);
+      if (!$('#loop').checked) {
+        clearInterval(timer); timer = null;
+        setTimeout(stop, Math.max(0, (loopStart - ctx.currentTime) * 1000) + 400);
+        return;
+      }
+    }
+  }
+}
+
+async function play() {
+  if (playing) return;
+  if (!score || dirty) { if (!load({keepTempo: true})) return; }
+  initAudio(); await ctx.resume(); applyFx();
+  ev = buildEvents(); loopBeats = score.loopBars * 4; idx = 0; markers = []; curBeat = 0;
+  loopSpb = 60 / (+$('#tempo').value || score.tempo);
+  loopStart = ctx.currentTime + 0.12;
+  playing = true;
+  timer = setInterval(tick, TICK_MS); tick();
+}
+
+function stop() {
+  playing = false; clearInterval(timer); timer = null; markers = [];
+  [phM, phD].forEach(p => { if (p) p.style.display = 'none'; });
+  if (ctx) { master.gain.setTargetAtTime(0, ctx.currentTime, 0.01); setTimeout(applyFx, 300); }
+}
+
+$('#play').onclick = play;
+$('#stop').onclick = stop;
+
+function place(ph, map, beat) {
+  if (!ph || !map.length) return;
+  let m = map[0];
+  for (const q of map) { if (q.beat <= beat + 1e-9) m = q; else break; }
+  ph.style.display = 'block';
+  ph.style.left = m.x + 'px'; ph.style.top = m.y + 'px'; ph.style.height = m.h + 'px';
+}
+
+const sc = $('#scope').getContext('2d'), buf = new Uint8Array(2048);
+function frame() {
+  if (analyser) {
+    analyser.getByteTimeDomainData(buf);
+    sc.fillStyle = '#101216'; sc.fillRect(0, 0, 1000, 70);
+    sc.strokeStyle = '#e0a24a'; sc.beginPath();
+    for (let i = 0; i < 1000; i++) { const y = buf[i * 2] / 255 * 70; i ? sc.lineTo(i, y) : sc.moveTo(i, y); }
+    sc.stroke();
+  }
+  if (playing) {
+    while (markers.length && markers[0].t <= ctx.currentTime) curBeat = markers.shift().beat;
+    place(phM, mapM, curBeat); place(phD, mapD, curBeat);
+  }
+  requestAnimationFrame(frame);
+}
+
+buildPrompt();
+frame();
+})();
+</script>
+</body>
+</html>
