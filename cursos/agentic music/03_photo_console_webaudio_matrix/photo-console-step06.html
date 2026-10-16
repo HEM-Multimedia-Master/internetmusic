@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 06 — FM Synthesis: Audio-Rate Modulation</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; width: 520px; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+  input[type="range"] { width: 320px; accent-color: #ff9900; }
+  button { background: #292929; color: #dcdcdc; border: 1px solid #383838; padding: 6px 12px; font: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="row">
+    <span>STEP 06 // FM SYNTHESIS (MODULATOR -> CARRIER FREQ)</span>
+    <button id="btnStart">START AUDIO</button>
+  </div>
+  <div class="row">
+    <label>1. CARRIER FREQ HZ (<span id="lblCar">220</span>)</label>
+    <input type="range" id="rngCar" min="60" max="880" value="220">
+  </div>
+  <div class="row">
+    <label>2. HARMONICITY RATIO (<span id="lblRat">1.50</span>)</label>
+    <input type="range" id="rngRat" min="0.25" max="6.0" step="0.05" value="1.50">
+  </div>
+  <div class="row">
+    <label>3. MODULATION INDEX HZ (<span id="lblIdx">350</span>)</label>
+    <input type="range" id="rngIdx" min="0" max="1500" value="350">
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 06: FREQUENCY MODULATION (FM) SYNTHESIS
+ * Concepts: [[fm-synthesis]], [[AudioParam]], Carrier vs. Modulator
+ * Principle: In Web Audio API, an AudioNode output can connect directly into
+ *            another node's [[AudioParam]] (such as carrier.frequency).
+ *            Modulator -> Index GainNode -> Carrier.frequency -> Master Out
+ * ============================================================================ */
+
+let ctx = null;
+let carrier = null;
+let modulator = null;
+let modIndexGain = null;
+
+function initFMSynth() {
+  if (ctx) return;
+  ctx = new AudioContext();
+
+  // 1. Create Carrier (audible oscillator) and Modulator (vibrates Carrier pitch)
+  carrier = ctx.createOscillator();
+  modulator = ctx.createOscillator();
+
+  // 2. modIndexGain controls how many Hertz the modulator swings the carrier
+  modIndexGain = ctx.createGain();
+
+  const master = ctx.createGain();
+  master.gain.value = 0.25;
+
+  // 3. FM Connection: Modulator -> modIndexGain -> carrier.frequency (AudioParam!)
+  modulator.connect(modIndexGain).connect(carrier.frequency);
+
+  // 4. Audio Connection: Carrier -> Master -> Speakers
+  carrier.connect(master).connect(ctx.destination);
+
+  carrier.start();
+  modulator.start();
+  updateFMParams();
+  document.getElementById('btnStart').textContent = 'RUNNING';
+}
+
+function updateFMParams() {
+  const cFreq = parseFloat(document.getElementById('rngCar').value);
+  const ratio = parseFloat(document.getElementById('rngRat').value);
+  const index = parseFloat(document.getElementById('rngIdx').value);
+
+  document.getElementById('lblCar').textContent = Math.round(cFreq);
+  document.getElementById('lblRat').textContent = ratio.toFixed(2);
+  document.getElementById('lblIdx').textContent = Math.round(index);
+
+  if (!ctx) return;
+  // Integer ratios (1, 2, 3) create harmonic timbres; non-integers (1.41, 2.7) create bells
+  carrier.frequency.setTargetAtTime(cFreq, ctx.currentTime, 0.02);
+  modulator.frequency.setTargetAtTime(cFreq * ratio, ctx.currentTime, 0.02);
+  modIndexGain.gain.setTargetAtTime(index, ctx.currentTime, 0.02);
+}
+
+document.getElementById('btnStart').onclick = initFMSynth;
+['rngCar', 'rngRat', 'rngIdx'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    initFMSynth();
+    updateFMParams();
+  });
+});
+</script>
+</body>
+</html>

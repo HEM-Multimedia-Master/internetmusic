@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 04 — Additive Synthesis: Summing Harmonic Partials</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; width: 520px; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+  input[type="range"] { width: 320px; accent-color: #ff9900; }
+  button { background: #292929; color: #dcdcdc; border: 1px solid #383838; padding: 6px 12px; font: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="row">
+    <span>STEP 04 // ADDITIVE SYNTHESIS (6 HARMONIC OSCILLATORS)</span>
+    <button id="btnStart">START AUDIO</button>
+  </div>
+  <div class="row">
+    <label>1. FUNDAMENTAL HZ (<span id="lblFreq">110</span>)</label>
+    <input type="range" id="rngFreq" min="55" max="440" value="110">
+  </div>
+  <div class="row">
+    <label>2. HARMONIC TILT (<span id="lblTilt">0.60</span>)</label>
+    <input type="range" id="rngTilt" min="0" max="1" step="0.01" value="0.60">
+  </div>
+  <div class="row">
+    <label>3. DETUNE SPREAD (<span id="lblSpread">2.0</span>)</label>
+    <input type="range" id="rngSpread" min="0" max="25" step="0.5" value="2.0">
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 04: ADDITIVE SYNTHESIS (FOURIER SERIES IN WEB AUDIO)
+ * Concepts: [[additive-synthesis]], [[loop]] (for), [[array]], [[OscillatorNode]]
+ * Principle: Any complex timbre can be built by summing sine waves at integer
+ *            multiples of a fundamental frequency: f, 2f, 3f, 4f, 5f, 6f.
+ * ============================================================================ */
+
+let ctx = null;
+const oscillators = []; // [[array]] storing the 6 sine OscillatorNodes
+const partGains = [];   // [[array]] storing the 6 individual GainNodes
+
+function initAdditiveSynth() {
+  if (ctx) return;
+  ctx = new AudioContext();
+
+  const master = ctx.createGain();
+  master.gain.value = 0.35;
+  master.connect(ctx.destination);
+
+  // Use a 'for' [[loop]] to create 6 harmonic partials (h = 1 .. 6)
+  for (let h = 1; h <= 6; h++) {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.connect(g).connect(master);
+    osc.start();
+
+    oscillators.push(osc);
+    partGains.push(g);
+  }
+  updateAdditiveParams();
+  document.getElementById('btnStart').textContent = 'RUNNING';
+}
+
+function updateAdditiveParams() {
+  const f0 = parseFloat(document.getElementById('rngFreq').value);
+  const tilt = parseFloat(document.getElementById('rngTilt').value);
+  const spread = parseFloat(document.getElementById('rngSpread').value);
+
+  document.getElementById('lblFreq').textContent = Math.round(f0);
+  document.getElementById('lblTilt').textContent = tilt.toFixed(2);
+  document.getElementById('lblSpread').textContent = spread.toFixed(1);
+
+  if (!ctx) return;
+
+  // Iterate over our array of oscillators using an [[arrow-function]]
+  oscillators.forEach((osc, index) => {
+    const harmonicNumber = index + 1; // 1, 2, 3, 4, 5, 6
+    const freq = f0 * harmonicNumber + (index * spread);
+    const amp = harmonicNumber === 1 ? 0.45 : Math.pow(tilt, index) * (0.4 / harmonicNumber);
+
+    osc.frequency.setTargetAtTime(freq, ctx.currentTime, 0.02);
+    partGains[index].gain.setTargetAtTime(amp, ctx.currentTime, 0.02);
+  });
+}
+
+document.getElementById('btnStart').onclick = initAdditiveSynth;
+['rngFreq', 'rngTilt', 'rngSpread'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    initAdditiveSynth();
+    updateAdditiveParams();
+  });
+});
+</script>
+</body>
+</html>

@@ -1,19 +1,16 @@
-# 01 Hugging Face audio models in 10 steps / en 10 étapes
+# 01 Hugging Face audio models in 10 steps / en 10 étapes (Google Colab)
 
-Slides (Obsidian Advanced Slides): slides_en.md, slides_fr.md
-Code: code/01 to code/10, shared helpers in code/common.py
-References: refs.bib
+Slides (Obsidian Advanced Slides): `slides_en.md`, `slides_fr.md`
+Google Colab Notebook (100% Cloud GPU, zero local install): `hf_audio_10_steps_colab.ipynb`
+Reference scripts: `code/01` to `code/10`, shared helpers in `code/common.py`
+References: `refs.bib`
 
-Setup / Installation
+## Cloud Setup / Exécution sur Google Colab (Recommandé — Zéro Installation)
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cd code
-python 01_setup_check.py
-python 02_download_models.py
-```
+1. Ouvrir `hf_audio_10_steps_colab.ipynb` dans **Google Colab** (`File → Upload notebook` ou depuis GitHub).
+2. Activer le GPU gratuit : **Runtime → Change runtime type → T4 GPU** (*Exécution → Modifier le type d'exécution → GPU T4*).
+3. Exécuter les cellules 1 à 10 directement dans le navigateur (microphone navigateur, AST, CLAP, Whisper, MusicGen et boucle agentique). Aucun Python ni modèle lourd n'est installé sur votre ordinateur.
+
 
 Run order / Ordre d'exécution
 

@@ -3,15 +3,15 @@ theme: moon
 ---
 
 | ![\|50](https://i.imgur.com/N8z2xP4.png) |                |                        |
-| ---------------------------------------- |:-------------- | ----------------------:|
-| **class 02**                             | Oct 17th, 2025 | *internet music 25/26* |
+| ---------------------------------------- | :------------- | ---------------------: |
+| **class 03**                             | Oct 16th, 2026 | *internet music 26/27* |
 
 # JS SETUP
 ---
 
 ### github and obsidian
 
-course materials are hosted on https://github.com/zzigo/internetmusic/tree/im24 to update run `git pull`
+course materials are hosted on https://github.com/orgs/HEM-Multimedia-Master/repositories to update run `git pull`
 
 ---
 

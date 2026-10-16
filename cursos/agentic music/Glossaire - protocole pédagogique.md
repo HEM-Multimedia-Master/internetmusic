@@ -42,7 +42,7 @@ Une action observable.
 Source, lien, date et éventuelle correction de la proposition de l’agent.
 ```
 
-## Huit fiches de départ
+## Huit fiches de départ (IA & Agentique)
 
 - [[Concept - Agent]]
 - [[Concept - Prompt]]
@@ -52,6 +52,18 @@ Source, lien, date et éventuelle correction de la proposition de l’agent.
 - [[Concept - API]]
 - [[Concept - Dépôt]]
 - [[Concept - Inférence]]
+
+## Fiches de programmation initiale & Web Audio (Atelier 03 — Photo-Console)
+
+- [[Concept - Variable]] (`[[variable]]`, `const`, `let`)
+- [[Concept - Array]] (`[[array]]`, `[[2d-array]]`, `[[loop]]`)
+- [[Concept - Function]] (`[[function]]`, `[[arrow-function]]`, `[[callback]]`, `[[normalization]]`)
+- [[Concept - Object]] (`[[object]]`, `[[JSON]]`, `[[mapping]]`)
+- [[Concept - Canvas et Peripheriques]] (`[[canvas]]`, `[[event-listener]]`, `[[getUserMedia]]`)
+- [[Concept - Web Audio API]] (`[[webaudioapi]]`, `[[AudioContext]]`, `[[AudioNode]]`, `[[GainNode]]`)
+- [[Concept - Synthese Audio]] (`[[additive-synthesis]]`, `[[subtractive-synthesis]]`, `[[fm-synthesis]]`, `[[granular-synthesis]]`)
+- [[Concept - Matrice et Feedback]] (`[[multiplexer]]`, `[[feedback]]`, `[[soft-clipping]]`)
+- [[Concept - Cloud Workflow]] (`[[github-dev]]`, `[[copilot]]`, `[[colab]]`, `[[github-pages]]`, `[[vercel]]`)
 
 ## Rituel de classe
 

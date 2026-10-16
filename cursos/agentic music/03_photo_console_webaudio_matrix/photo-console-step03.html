@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 03 — Polygon Crop &amp; Vector Arrow Slider</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; }
+  canvas { display: block; border: 1px solid #383838; cursor: grab; user-select: none; touch-action: none; }
+  .bar { display: flex; justify-content: space-between; margin-bottom: 8px; color: #8c8c8c; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="bar">
+    <span>STEP 03 // POLYGON CROP &amp; VECTOR PROJECTION SLIDER</span>
+    <span id="readout">DRAG FADER ALONG ARROW</span>
+  </div>
+  <canvas id="consoleCanvas" width="520" height="300"></canvas>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 03: POLYGON IMAGE CROP & DIRECTIONAL VECTOR SLIDER
+ * Concepts: [[array]], [[object]], [[arrow-function]], Vector Dot Product
+ * Audio:    Two detuned oscillators controlled by a diagonal/vertical slider
+ * ============================================================================ */
+
+const canvas = document.getElementById('consoleCanvas');
+const g = canvas.getContext('2d');
+const readout = document.getElementById('readout');
+
+// 1. Offscreen photograph containing a fader cap at the center (260, 150)
+const basePhoto = document.createElement('canvas');
+basePhoto.width = 520; basePhoto.height = 300;
+const bg = basePhoto.getContext('2d');
+
+bg.fillStyle = '#1c1c1c'; bg.fillRect(0, 0, 520, 300);
+bg.fillStyle = '#101010'; bg.fillRect(256, 45, 8, 210); // Fader slot track
+bg.fillStyle = '#2e2e2e'; bg.fillRect(230, 132, 60, 36); // Fader cap on photo
+bg.strokeStyle = '#777';  bg.strokeRect(230, 132, 60, 36);
+bg.fillStyle = '#ff9900'; bg.fillRect(234, 149, 52, 3);  // Center line on cap
+
+// 2. Define the slider: a 4-point polygon [[array]] + displacement vector (vx0,vy0 -> vx1,vy1)
+const slider = {
+  poly: [
+    { x: 228, y: 130 }, { x: 292, y: 130 },
+    { x: 292, y: 170 }, { x: 228, y: 170 }
+  ],
+  cx: 260, cy: 150,          // Original center of the polygon on the photo
+  vx0: 260, vy0: 235,        // Start of arrow vector (value = 0.0)
+  vx1: 260, vy1: 65,         // End of arrow vector   (value = 1.0)
+  val: 0.5                   // Normalized slider position (0.0 .. 1.0)
+};
+
+// 3. Project mouse point (px, py) onto the arrow vector using the Dot Product
+const projectPointOnVector = (px, py, s) => {
+  const vx = s.vx1 - s.vx0;
+  const vy = s.vy1 - s.vy0;
+  const lengthSquared = vx * vx + vy * vy;
+  const t = ((px - s.vx0) * vx + (py - s.vy0) * vy) / lengthSquared;
+  return Math.max(0, Math.min(1, t)); // Clamp to [0.0, 1.0]
+};
+
+// 4. Render base photo, darken original cutout slot, draw vector arrow, and slide the crop!
+function render() {
+  g.drawImage(basePhoto, 0, 0);
+
+  // Darken where the fader cap was originally cut from
+  g.fillStyle = 'rgba(10, 10, 10, 0.75)';
+  g.fillRect(228, 130, 64, 40);
+
+  // Draw the displacement vector arrow (vx0,vy0 -> vx1,vy1)
+  g.strokeStyle = '#7ec8c8';
+  g.beginPath(); g.moveTo(slider.vx0, slider.vy0); g.lineTo(slider.vx1, slider.vy1); g.stroke();
+
+  // Compute how far (dx, dy) the cropped polygon has moved along the vector
+  const targetX = slider.vx0 + slider.val * (slider.vx1 - slider.vx0);
+  const targetY = slider.vy0 + slider.val * (slider.vy1 - slider.vy0);
+  const dx = targetX - slider.cx;
+  const dy = targetY - slider.cy;
+
+  // Translate, clip the polygon shape, and draw the cropped image piece!
+  g.save();
+  g.translate(dx, dy);
+  g.beginPath();
+  slider.poly.forEach((pt, i) => (i === 0 ? g.moveTo(pt.x, pt.y) : g.lineTo(pt.x, pt.y)));
+  g.closePath();
+  g.clip();
+  g.drawImage(basePhoto, 0, 0);
+  g.strokeStyle = '#ff9900';
+  g.stroke();
+  g.restore();
+}
+
+// 5. Web Audio: Two oscillators creating beating intervals controlled by the slider
+let ctx = null, oscA = null, oscB = null;
+
+function updateAudio(e) {
+  if (!ctx) {
+    ctx = new AudioContext();
+    oscA = ctx.createOscillator();
+    oscB = ctx.createOscillator();
+    const amp = ctx.createGain();
+    amp.gain.value = 0.2;
+    oscA.type = 'sawtooth'; oscA.frequency.value = 110;
+    oscB.type = 'sawtooth'; oscB.frequency.value = 110;
+    oscA.connect(amp); oscB.connect(amp); amp.connect(ctx.destination);
+    oscA.start(); oscB.start();
+  }
+  const rect = canvas.getBoundingClientRect();
+  slider.val = projectPointOnVector(e.clientX - rect.left, e.clientY - rect.top, slider);
+
+  // Slider sweeps Osc B from unison (110 Hz) to a fifth above (165 Hz)
+  const freqB = 110 + slider.val * 55;
+  oscB.frequency.setTargetAtTime(freqB, ctx.currentTime, 0.02);
+  readout.textContent = `SLIDER: ${Math.round(slider.val * 100)}% | OSC B: ${freqB.toFixed(1)} HZ`;
+  render();
+}
+
+canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture(e.pointerId); updateAudio(e); });
+canvas.addEventListener('pointermove', (e) => { if (canvas.hasPointerCapture(e.pointerId)) updateAudio(e); });
+
+render();
+</script>
+</body>
+</html>

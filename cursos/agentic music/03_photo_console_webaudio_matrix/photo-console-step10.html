@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 10 — Complete Mini-Console: Mapping, Backdoor [L] &amp; JSON</title>
+<style>
+  body { margin: 0; background: #121212; color: #dcdcdc; font: 12px/1.4 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  canvas { border: 1px solid #383838; cursor: ns-resize; user-select: none; touch-action: none; }
+  #backdoor { display: none; background: #212121; border: 1px solid #383838; padding: 10px; width: 520px; margin-top: 8px; }
+  body.setup #backdoor { display: block; }
+  #cornerL { position: fixed; left: 8px; bottom: 8px; width: 14px; height: 14px; border-left: 2px solid #ff9900; border-bottom: 2px solid #ff9900; cursor: pointer; opacity: 0.5; }
+  select, button { background: #292929; color: #dcdcdc; border: 1px solid #383838; padding: 4px 8px; font: inherit; }
+</style>
+</head>
+<body>
+
+<!-- Magic Lower-Left Corner 'L' Trigger (or press 'L' on keyboard) -->
+<div id="cornerL" title="Toggle Setup Backdoor [Key: L]"></div>
+
+<!-- Default Perform View: Only the Console Canvas -->
+<canvas id="consoleCanvas" width="520" height="260"></canvas>
+
+<!-- Setup Backdoor Panel (Hidden until 'L' is pressed or corner clicked) -->
+<div id="backdoor">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span>STEP 10 // SETUP BACKDOOR [KEY: L] — CONTROL MAPPING</span>
+    <button id="btnExport">COPY PATCH JSON</button>
+  </div>
+  <div style="display:flex;justify-content:space-between;gap:8px;">
+    <label>KNOB K1 -> <select id="mapK1"><option value="car">FM Carrier Hz</option><option value="idx">FM Index</option><option value="fb">Delay Feedback</option></select></label>
+    <label>FADER S1 -> <select id="mapS1"><option value="idx" selected>FM Index</option><option value="car">FM Carrier Hz</option><option value="fb">Delay Feedback</option></select></label>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 10: PERFORM VIEW, BACKDOOR [L], MAPPING & JSON
+ * Concepts: [[mapping]], [[JSON]], [[object]], Ubiquitous Instrument Design
+ * Principle: Performers see only the visual instrument. Pressing 'L' or
+ *            clicking the lower-left 'L' opens the construction backdoor.
+ * ============================================================================ */
+
+const canvas = document.getElementById('consoleCanvas');
+const g = canvas.getContext('2d');
+
+// 1. State [[object]] holding our 2 image controls (Knob K1 + Slider S1) and targets
+const state = {
+  knob:   { cx: 160, cy: 130, r: 52, val: 0.35, target: 'car' },
+  slider: { x: 360, y0: 200, y1: 60, val: 0.45, target: 'idx' }
+};
+
+// 2. Toggle Setup Backdoor via lower-left corner or 'L' key
+const toggleBackdoor = () => document.body.classList.toggle('setup');
+document.getElementById('cornerL').onclick = toggleBackdoor;
+window.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'l') toggleBackdoor(); });
+
+// 3. Web Audio Engine: FM Synth + Delay Feedback loop
+let ctx = null, params = {};
+
+function initAudio() {
+  if (ctx) return;
+  ctx = new AudioContext();
+  const car = ctx.createOscillator(), mod = ctx.createOscillator();
+  const idx = ctx.createGain(), del = ctx.createDelay(1.0), fb = ctx.createGain(), out = ctx.createGain();
+  mod.frequency.value = 165; del.delayTime.value = 0.22; out.gain.value = 0.22;
+
+  mod.connect(idx).connect(car.frequency);
+  car.connect(out).connect(ctx.destination);
+  car.connect(del).connect(fb).connect(del);
+  del.connect(out);
+  car.start(); mod.start();
+
+  params = { car: car.frequency, idx: idx.gain, fb: fb.gain };
+  syncAudio();
+}
+
+// 4. [[mapping]]: Convert normalized [0..1] visual gesture into parameter ranges
+function syncAudio() {
+  if (!ctx) return;
+  const ranges = { car: [70, 600], idx: [0, 900], fb: [0, 0.85] };
+  [state.knob, state.slider].forEach(ctrl => {
+    const [min, max] = ranges[ctrl.target];
+    params[ctrl.target].setTargetAtTime(min + ctrl.val * (max - min), ctx.currentTime, 0.02);
+  });
+}
+
+// 5. Render console with rotating Knob K1 and vertical Fader S1
+function render() {
+  g.fillStyle = '#1a1a1a'; g.fillRect(0, 0, 520, 260);
+  // Draw Rotary Knob K1
+  const a = (state.knob.val - 0.5) * Math.PI * 1.5;
+  g.save();
+  g.translate(state.knob.cx, state.knob.cy); g.rotate(a);
+  g.fillStyle = '#292929'; g.beginPath(); g.arc(0, 0, state.knob.r, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = '#ff9900'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -state.knob.r); g.stroke();
+  g.restore();
+
+  // Draw Fader S1
+  const sy = state.slider.y0 + state.slider.val * (state.slider.y1 - state.slider.y0);
+  g.strokeStyle = '#383838'; g.beginPath(); g.moveTo(360, 60); g.lineTo(360, 200); g.stroke();
+  g.fillStyle = '#292929'; g.fillRect(338, sy - 14, 44, 28);
+  g.fillStyle = '#7ec8c8'; g.fillRect(340, sy - 1, 40, 2);
+}
+
+canvas.addEventListener('pointermove', (e) => {
+  if (!e.buttons) return;
+  initAudio();
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if (x < 260) state.knob.val = Math.max(0, Math.min(1, 1 - (y - 50) / 160));
+  else state.slider.val = Math.max(0, Math.min(1, (state.slider.y0 - y) / (state.slider.y0 - state.slider.y1)));
+  syncAudio(); render();
+});
+
+document.getElementById('mapK1').onchange = (e) => { state.knob.target = e.target.value; syncAudio(); };
+document.getElementById('mapS1').onchange = (e) => { state.slider.target = e.target.value; syncAudio(); };
+document.getElementById('btnExport').onclick = () => navigator.clipboard.writeText(JSON.stringify(state));
+render();
+</script>
+</body>
+</html>

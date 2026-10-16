@@ -21,42 +21,16 @@ Publier **la copie du dossier `applications/`**, pas le vault entier, les PDF ou
 
 Tous les chemins de ces applications sont relatifs ; ils supportent le sous-dossier du dépôt. La présence d’un dépôt privé ne garantit pas un site privé. [Configurer Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-## B. Même publication depuis VS Code et Git
+## B. Éditer et publier directement depuis `github.dev` (VS Code dans le navigateur — sans terminal)
 
-**Choisir B au lieu de l’upload A pour le contenu initial.** Créer cette fois un dépôt GitHub **vide**, sans README ni licence. Dans VS Code, ouvrir la copie des applications, puis **Terminal → New Terminal**.
-
-> [!info] Enregistrer une première version
-> Remplacer l’adresse du dépôt. Ces commandes sont les mêmes dans PowerShell et le terminal macOS.
-> ```bash
-> git init
-> git branch -M main
-> git add .
-> git commit -m "Premiers hyperphones"
-> git remote add origin https://github.com/PSEUDO/agentic-music-prenom.git
-> git push -u origin main
-> ```
-
-Si Git demande une identité, configurer **dans ce dépôt** :
-
-> [!info] Identité de version
-> ```bash
-> git config user.name "Votre nom"
-> git config user.email "Votre adresse GitHub ou adresse noreply GitHub"
-> ```
-> Relancer ensuite `git commit`, puis `git push`. L’authentification peut ouvrir un navigateur ou le gestionnaire d’identifiants ; utiliser le parcours de connexion proposé. Le mot de passe GitHub ordinaire n’est pas une authentification Git HTTPS.
-
-Ensuite suivre les étapes 5–9 du parcours A. Pour une modification :
-
-> [!info] Inspecter puis publier la modification
-> ```bash
-> git diff
-> git add echo/politique.js
-> git commit -m "Registre actif abaissé après écoute"
-> git push
-> ```
-> `git diff` montre ce qui a changé. `git add` sélectionne le fichier. `commit` garde une version. `push` la partage et déclenche la publication configurée.
-
-Si le dépôt distant contient déjà des fichiers, le cloner d’abord avec VS Code ou GitHub Desktop ; ne pas forcer le push pour effacer son historique. La voie graphique **Source Control → Stage → Commit → Sync** convient aussi.
+1. Ouvrir votre dépôt sur GitHub (`https://github.com/PSEUDO/agentic-music-prenom`).
+2. **Appuyer sur la touche `.` (point) du clavier** : l'éditeur **VS Code pour le Web (`[[github-dev]]`)** s'ouvre instantanément dans l'onglet du navigateur.
+3. Ouvrir le fichier souhaité (`index.html`, `echo/politique.js`, ou `03_photo_console_webaudio_matrix/index.html`) et effectuer la modification avec l'aide du panneau **[[copilot]] Chat**.
+4. Cliquer sur l'icône **Source Control** dans la barre latérale gauche (trois cercles reliés par une branche) :
+   - Cliquer sur le fichier modifié pour inspecter les différences ligne par ligne (équivalent visuel de `git diff`).
+   - Écrire un court message expliquant la décision musicale (ex. *« Ajout d'un knob rotatif assigné au feedback Delay → FM »*).
+   - Cliquer sur **Commit & Push**.
+5. GitHub Pages (ou Vercel) redéploie automatiquement la nouvelle version en quelques secondes sur l'URL HTTPS publique. Aucun `git` local ni terminal n'est nécessaire.
 
 ## C. Vercel — alternative pour un projet personnel
 

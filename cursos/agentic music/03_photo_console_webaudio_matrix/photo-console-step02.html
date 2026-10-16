@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 02 — Circular Image Crop: The Spinning Rotary Knob</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; }
+  canvas { display: block; border: 1px solid #383838; cursor: ns-resize; user-select: none; touch-action: none; }
+  .bar { display: flex; justify-content: space-between; margin-bottom: 8px; color: #8c8c8c; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="bar">
+    <span>STEP 02 // CIRCULAR IMAGE CROP &amp; ROTATING KNOB</span>
+    <span id="readout">DRAG KNOB UP/DOWN</span>
+  </div>
+  <canvas id="consoleCanvas" width="520" height="300"></canvas>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 02: CIRCULAR CROP & ROTATION ON ITS OWN AXIS
+ * Concepts: [[function]], [[object]], [[canvas]] clip() + translate() + rotate()
+ * Audio:    Sawtooth [[OscillatorNode]] -> Lowpass [[BiquadFilterNode]]
+ * ============================================================================ */
+
+const canvas = document.getElementById('consoleCanvas');
+const g = canvas.getContext('2d');
+const readout = document.getElementById('readout');
+
+// 1. Create an offscreen canvas that holds our "photograph" of a hardware panel
+const basePhoto = document.createElement('canvas');
+basePhoto.width = 520;
+basePhoto.height = 300;
+const bg = basePhoto.getContext('2d');
+
+function drawBasePhotograph() {
+  bg.fillStyle = '#1c1c1c';
+  bg.fillRect(0, 0, 520, 300);
+  // Brushed metal texture lines on the photograph
+  bg.strokeStyle = '#282828';
+  for (let y = 0; y < 300; y += 4) {
+    bg.beginPath(); bg.moveTo(0, y); bg.lineTo(520, y); bg.stroke();
+  }
+  // Draw a physical knob painted onto the base photograph at (260, 150)
+  bg.fillStyle = '#111';
+  bg.beginPath(); bg.arc(260, 150, 64, 0, Math.PI * 2); bg.fill();
+  bg.fillStyle = '#2d2d2d';
+  bg.beginPath(); bg.arc(260, 150, 52, 0, Math.PI * 2); bg.fill();
+  // White + amber pointer line painted directly on the photo
+  bg.strokeStyle = '#ff9900';
+  bg.lineWidth = 4;
+  bg.beginPath(); bg.moveTo(260, 150); bg.lineTo(260, 102); bg.stroke();
+}
+
+// 2. Define our circular knob as a JavaScript [[object]]
+const knob = {
+  cx: 260,      // Center X on the photo
+  cy: 150,      // Center Y on the photo
+  r: 64,        // Radius in pixels
+  val: 0.5      // Normalized value between 0.0 and 1.0
+};
+
+// 3. Cut the circle out of basePhoto and spin it by angle theta!
+function render() {
+  // A) Draw the static photograph
+  g.drawImage(basePhoto, 0, 0);
+
+  // B) Convert normalized value (0..1) to an angle in radians (-135 deg to +135 deg)
+  const angle = (knob.val - 0.5) * Math.PI * 1.5;
+
+  // C) Save state, clip a circle, move origin to (cx, cy), rotate, and redraw the photo!
+  g.save();
+  g.beginPath();
+  g.arc(knob.cx, knob.cy, knob.r, 0, Math.PI * 2);
+  g.clip();                        // Only pixels inside this circle will be drawn
+  g.translate(knob.cx, knob.cy);   // Move coordinate (0,0) to the knob center
+  g.rotate(angle);                 // Rotate canvas around (cx, cy)
+  g.drawImage(basePhoto, -knob.cx, -knob.cy); // Draw photo shifted back by (-cx, -cy)
+  g.restore();
+
+  // D) Draw a thin Ableton-amber ring showing the cropped zone
+  g.strokeStyle = '#ff9900';
+  g.lineWidth = 1.5;
+  g.beginPath();
+  g.arc(knob.cx, knob.cy, knob.r + 3, 0, Math.PI * 2);
+  g.stroke();
+}
+
+// 4. Web Audio: Sawtooth Oscillator -> Lowpass Filter -> Output
+let ctx = null, osc = null, filter = null;
+
+function initAudio() {
+  if (ctx) return;
+  ctx = new AudioContext();
+  osc = ctx.createOscillator();
+  filter = ctx.createBiquadFilter();
+  const amp = ctx.createGain();
+
+  osc.type = 'sawtooth';
+  osc.frequency.value = 110;       // A2 bass drone
+  filter.type = 'lowpass';
+  filter.Q.value = 6.0;            // Resonant filter peak
+  amp.gain.value = 0.25;
+
+  osc.connect(filter).connect(amp).connect(ctx.destination);
+  osc.start();
+}
+
+// 5. Dragging the knob vertically rotates the image and sweeps the filter cutoff
+let startY = 0, startVal = 0.5;
+
+canvas.addEventListener('pointerdown', (e) => {
+  initAudio();
+  canvas.setPointerCapture(e.pointerId);
+  startY = e.clientY;
+  startVal = knob.val;
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (!canvas.hasPointerCapture(e.pointerId)) return;
+  const deltaY = (startY - e.clientY) / 150;
+  knob.val = Math.max(0, Math.min(1, startVal + deltaY));
+
+  // Map knob.val (0..1) to Filter Cutoff (80 Hz .. 3200 Hz)
+  const cutoff = 80 + knob.val * 3120;
+  filter.frequency.setTargetAtTime(cutoff, ctx.currentTime, 0.02);
+  readout.textContent = `KNOB: ${Math.round(knob.val * 100)}% | CUTOFF: ${Math.round(cutoff)} HZ`;
+  render();
+});
+
+drawBasePhotograph();
+render();
+</script>
+</body>
+</html>

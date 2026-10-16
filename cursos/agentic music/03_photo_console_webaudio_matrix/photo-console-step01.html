@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 01 — The Browser as Instrument: Canvas & First Tone</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; }
+  canvas { display: block; border: 1px solid #383838; cursor: crosshair; }
+  .bar { display: flex; justify-content: space-between; margin-bottom: 8px; color: #8c8c8c; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="bar">
+    <span>STEP 01 // CANVAS &amp; FIRST WEB AUDIO TONE</span>
+    <span id="readout">CLICK &amp; DRAG ON CONSOLE</span>
+  </div>
+  <canvas id="consoleCanvas" width="520" height="300"></canvas>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 01: THE BROWSER AS A MUSICAL INSTRUMENT
+ * Concepts: [[variable]] (const, let), [[canvas]], [[AudioContext]],
+ *           [[OscillatorNode]], [[GainNode]], [[event-listener]]
+ * ============================================================================ */
+
+// 1. Store references to HTML elements inside constants ([[variable]])
+const canvas = document.getElementById('consoleCanvas');
+const g = canvas.getContext('2d'); // 2D drawing context of the [[canvas]]
+const readout = document.getElementById('readout');
+
+// 2. Declare variables with 'let' because their values will change over time
+let ctx = null;   // Will hold the Web Audio [[AudioContext]]
+let osc = null;   // Will hold the [[OscillatorNode]] (sound generator)
+let gain = null;  // Will hold the [[GainNode]] (volume control)
+let cursorX = 260;
+let cursorY = 150;
+
+// 3. A [[function]] that draws our console image and current X/Y crosshair
+function drawConsole() {
+  g.fillStyle = '#141414';
+  g.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw a subtle grid representing our console surface
+  g.strokeStyle = '#262626';
+  for (let x = 0; x < canvas.width; x += 40) {
+    g.beginPath(); g.moveTo(x, 0); g.lineTo(x, canvas.height); g.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 40) {
+    g.beginPath(); g.moveTo(0, y); g.lineTo(canvas.width, y); g.stroke();
+  }
+
+  // Draw crosshair at (cursorX, cursorY)
+  g.strokeStyle = '#ff9900';
+  g.beginPath();
+  g.moveTo(cursorX, 0); g.lineTo(cursorX, canvas.height);
+  g.moveTo(0, cursorY); g.lineTo(canvas.width, cursorY);
+  g.stroke();
+}
+
+// 4. Initialize the Web Audio API graph on the first user gesture
+function startAudioIfNeeded() {
+  if (ctx) return; // Already running
+
+  ctx = new AudioContext();          // Start the browser audio engine
+  osc = ctx.createOscillator();      // Create a tone generator
+  gain = ctx.createGain();           // Create an amplifier node
+
+  osc.type = 'triangle';             // Waveform: 'sine', 'triangle', 'sawtooth', 'square'
+  osc.frequency.value = 220;         // Initial frequency in Hertz (A3)
+  gain.gain.value = 0.0;             // Start silent
+
+  // Wire the audio graph: Oscillator -> Gain -> Speakers (destination)
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+}
+
+// 5. Update sound from mouse coordinates (X = Pitch, Y = Volume)
+function updateFromPointer(event) {
+  const rect = canvas.getBoundingClientRect();
+  cursorX = event.clientX - rect.left;
+  cursorY = event.clientY - rect.top;
+
+  // Normalize X and Y into a 0.0 -> 1.0 range ([[normalization]])
+  const normX = Math.max(0, Math.min(1, cursorX / canvas.width));
+  const normY = 1.0 - Math.max(0, Math.min(1, cursorY / canvas.height));
+
+  if (ctx) {
+    const freq = 80 + normX * 640;   // Map X (0..1) to 80..720 Hz
+    const vol = normY * 0.35;        // Map Y (0..1) to 0..0.35 amplitude
+    osc.frequency.setTargetAtTime(freq, ctx.currentTime, 0.02);
+    gain.gain.setTargetAtTime(vol, ctx.currentTime, 0.02);
+    readout.textContent = `FREQ: ${Math.round(freq)} HZ | GAIN: ${vol.toFixed(2)}`;
+  }
+  drawConsole();
+}
+
+// 6. Attach [[event-listener]] callbacks to the canvas
+canvas.addEventListener('pointerdown', (e) => {
+  startAudioIfNeeded();
+  canvas.setPointerCapture(e.pointerId);
+  updateFromPointer(e);
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (e.buttons > 0) updateFromPointer(e);
+});
+
+canvas.addEventListener('pointerup', () => {
+  if (ctx) gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+});
+
+drawConsole();
+</script>
+</body>
+</html>

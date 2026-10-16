@@ -20,12 +20,13 @@ note: Le dossier code/ contient un script par étape. Diapositives et code sont 
 
 ---
 
-## Cadre
+## Cadre (100 % Google Colab — Zéro Installation)
 
-- Exécution locale, modèles publics, sans compte ni clé d'API
-- Entrées : microphone, fichiers mp3, textes (prompts)
+- Exécution dans le navigateur sur **Google [[colab]]** (GPU T4 gratuit), sans installation Python locale
+- Notebook unique : `hf_audio_10_steps_colab.ipynb`
+- Entrées : microphone du navigateur, fichiers mp3/wav, textes (prompts)
 - Modèles : AST, CLAP, Whisper, MusicGen
-- Sortie : fichiers wav dans code/out/
+- Sortie : lecteurs audio intégrés `IPython.display.Audio` et fichiers `.wav`
 
 --
 
@@ -54,51 +55,46 @@ Vérifier la licence sur chaque fiche de modèle. Les poids de MusicGen sont non
 
 ---
 
-## Étape 1. Environnement
+## Étape 1. Environnement Google Colab
 
-```bash
-cd "agentic music/01_hf_audio_10_steps"
-python3 -m venv .venv
-source .venv/bin/activate          # Windows : .venv\Scripts\activate
-pip install -r requirements.txt
-cd code
-python 01_setup_check.py
+Dans Google Colab, activer **Exécution → Modifier le type d'exécution → GPU T4**, puis exécuter la cellule 1 :
+
+```python
+!pip install -q transformers accelerate librosa soundfile torchaudio
+import torch
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print("Device:", DEVICE)
 ```
 
-note: ffmpeg est facultatif. L'installer (brew install ffmpeg, ou winget install ffmpeg sous Windows) seulement si un mp3 ne se charge pas.
+note: Tout tourne sur la machine virtuelle de Colab. Aucun Python, venv ni ffmpeg n'est installé sur l'ordinateur de l'étudiant.
 
 ---
 
-## Étape 2. Télécharger les modèles
-
-```bash
-python 02_download_models.py
-```
+## Étape 2. Charger les modèles dans le cache Colab
 
 ```python
-path = snapshot_download(repo, ignore_patterns=["*.msgpack", "*.h5", "*.onnx", "*.bin"])
+MODELS = {
+    "ast": "MIT/ast-finetuned-audioset-10-10-0.4593",
+    "clap": "laion/clap-htsat-unfused",
+    "whisper": "openai/whisper-tiny",
+    "musicgen": "facebook/musicgen-small",
+}
 ```
 
-- Les fichiers vont dans le cache Hugging Face, une seule fois
-- HF_HOME déplace le cache vers un autre disque
-- Prévoir plusieurs Go au total, MusicGen étant le plus lourd
+- Les poids (plusieurs Go) sont téléchargés sur les disques de Google Colab, jamais sur les portables des étudiants
+- Sur GPU T4, la génération MusicGen prend quelques secondes au lieu d'une minute sur CPU
 
 ---
 
-## Étape 3. Microphone
-
-```bash
-python 03_record_mic.py --seconds 5
-```
+## Étape 3. Microphone dans le navigateur (Colab)
 
 ```python
-y = sd.rec(int(seconds * sr), samplerate=sr, channels=1, dtype="float32")
-sd.wait()
+y_input = record_colab_mic(seconds=5, sr=16000)
+display(Audio(y_input, rate=16000))
 ```
 
-- Résultat : out/mic.wav
-- macOS : autoriser le terminal dans Réglages Système, Confidentialité, Microphone
-- Un pic inférieur à 0,01 indique le silence ou une autorisation bloquée
+- Capture le microphone du navigateur via `navigator.mediaDevices.getUserMedia` injecté dans la cellule Colab
+- Repli automatique : si le micro est refusé, `make_demo_audio()` génère un accord synthétique de test
 
 ---
 

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 09 — Audio Multiplexer Matrix &amp; Safe Feedback</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; width: 540px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #383838; padding: 6px; text-align: center; }
+  button { background: #292929; color: #dcdcdc; border: 1px solid #383838; padding: 5px 10px; font: inherit; cursor: pointer; }
+  input[type="range"] { width: 95px; accent-color: #ff9900; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <span>STEP 09 // 3x3 MULTIPLEXER MATRIX &amp; TANH FEEDBACK</span>
+    <div>
+      <button id="btnStart">START MATRIX</button>
+      <button id="btnPanic">PANIC (ZERO FB)</button>
+    </div>
+  </div>
+  <table id="matrixGrid"></table>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 09: N×M MULTIPLEXER MATRIX & CYBERNETIC FEEDBACK
+ * Concepts: [[multiplexer]], [[2d-array]], [[feedback]], [[soft-clipping]]
+ * Principle: Any module output (Row) can route into any module input (Column)
+ *            through a 2D grid of GainNodes. A WaveShaperNode (Math.tanh)
+ *            soft-clips feedback loops so self-oscillation never distorts!
+ * ============================================================================ */
+
+const ROWS = ['FM OUT', 'FILTER OUT', 'DELAY OUT'];
+const COLS = ['FM MOD IN', 'FILTER IN', 'DELAY IN', 'MASTER OUT'];
+let ctx = null;
+const matrixGains = []; // 2D [[array]] of GainNodes: matrixGains[r][c]
+
+// 1. Build a Math.tanh() saturation curve to tame runaway feedback loops
+function createTanhClipper(context) {
+  const shaper = context.createWaveShaper();
+  const curve = new Float32Array(1024);
+  for (let i = 0; i < 1024; i++) {
+    const x = (i * 2) / 1024 - 1;
+    curve[i] = Math.tanh(x * 2.2);
+  }
+  shaper.curve = curve;
+  return shaper;
+}
+
+function initMatrixAudio() {
+  if (ctx) return;
+  ctx = new AudioContext();
+
+  // Module 0: FM Oscillator (with audio-rate modulation input)
+  const fmOsc = ctx.createOscillator();
+  const fmModIn = ctx.createGain();
+  fmOsc.frequency.value = 180;
+  fmModIn.gain.value = 500; // Scales incoming audio into Hertz
+  fmModIn.connect(fmOsc.frequency);
+  fmOsc.start();
+
+  // Module 1: Resonant Bandpass Filter
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 520;
+  filter.Q.value = 5.0;
+
+  // Module 2: Delay Line (0.18s) with tanh soft-clipper
+  const delay = ctx.createDelay(1.0);
+  delay.delayTime.value = 0.18;
+  const clipper = createTanhClipper(ctx);
+  delay.connect(clipper);
+
+  // Safety 12ms micro-delays on feedback inputs to prevent 0-sample Web Audio lock
+  const safeFM = ctx.createDelay(0.1); safeFM.delayTime.value = 0.012;
+  const safeFilt = ctx.createDelay(0.1); safeFilt.delayTime.value = 0.012;
+  safeFM.connect( createTanhClipper(ctx) ).connect(fmModIn);
+  safeFilt.connect( createTanhClipper(ctx) ).connect(filter);
+
+  const master = ctx.createGain();
+  master.gain.value = 0.25;
+  master.connect(ctx.destination);
+
+  const sources = [fmOsc, filter, clipper];
+  const dests = [safeFM, safeFilt, delay, master];
+
+  // Wire every Row (source) to every Column (destination) via its own GainNode!
+  sources.forEach((srcNode, r) => {
+    matrixGains[r] = [];
+    dests.forEach((dstNode, c) => {
+      const g = ctx.createGain();
+      g.gain.value = Number(document.getElementById(`cell_${r}_${c}`).value);
+      srcNode.connect(g).connect(dstNode);
+      matrixGains[r][c] = g;
+    });
+  });
+  document.getElementById('btnStart').textContent = 'RUNNING';
+}
+
+// Build the HTML table for our 3x4 Multiplexer Matrix
+const tbl = document.getElementById('matrixGrid');
+tbl.innerHTML = `<tr><th>OUT \\ IN</th>${COLS.map(c => `<th>${c}</th>`).join('')}</tr>` +
+  ROWS.map((rName, r) => `<tr><th>${rName}</th>` + COLS.map((_, c) => {
+    const init = (r === 0 && c === 2) ? 0.5 : (r === 2 && c === 0) ? 0.4 : (r === 2 && c === 3) ? 0.6 : 0;
+    return `<td><input type="range" id="cell_${r}_${c}" min="0" max="1.2" step="0.02" value="${init}"></td>`;
+  }).join('') + `</tr>`).join('');
+
+tbl.querySelectorAll('input').forEach(inp => {
+  inp.oninput = () => {
+    initMatrixAudio();
+    const [, r, c] = inp.id.split('_').map(Number);
+    matrixGains[r][c].gain.setTargetAtTime(+inp.value, ctx.currentTime, 0.02);
+  };
+});
+
+document.getElementById('btnStart').onclick = initMatrixAudio;
+document.getElementById('btnPanic').onclick = () => {
+  tbl.querySelectorAll('input').forEach(inp => {
+    const [, r, c] = inp.id.split('_').map(Number);
+    if (c < 3) { inp.value = 0; if (ctx) matrixGains[r][c].gain.setTargetAtTime(0, ctx.currentTime, 0.02); }
+  });
+};
+</script>
+</body>
+</html>

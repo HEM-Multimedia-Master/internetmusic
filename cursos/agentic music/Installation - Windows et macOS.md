@@ -3,78 +3,69 @@ type: note
 title: Installation — Windows et macOS
 tags: [organisation, installation, agentic-music]
 ---
-# Installation — Windows et macOS
+# Installation — Circuit 100 % Cloud (Zéro Installation)
 
-Préparer 30–45 minutes avant la séance. Le parcours principal évite Node.js, Python et tout GPU dédié. Apporter un casque, un ordinateur, et facultativement un téléphone.
+**Principe du cours à la HEM : aucune installation de Python, Node.js, Git ni d'IDE lourd sur les ordinateurs des étudiants.** Tout le parcours se déroule dans le navigateur web via **Google [[colab]]**, **VS Code pour le Web (`[[github-dev]]` / Codespaces)**, et **[[github-pages]] / [[vercel]]**. Apporter simplement un casque, un navigateur récent (Chrome, Edge, Firefox ou Safari) et facultativement un téléphone.
 
-## 1. Obsidian et le cours
+```mermaid
+flowchart LR
+  C["1. Google Colab (Python / Modèles Audio HF)"] --> G["2. Dépôt GitHub (Template)"]
+  G --> V["3. github.dev (touche '.') + Copilot Chat"]
+  V --> P["4. Commit direct dans le navigateur"]
+  P --> D["5. URL HTTPS : GitHub Pages / Vercel"]
+```
 
-1. Installer [Obsidian](https://obsidian.md/download) pour votre système.
-2. Ouvrir le vault fourni avec **Open folder as vault**. Le dossier du cours est `cursos/agentic music`.
-3. Ouvrir [[agentic music MOC]], puis [[classe-01-machines-qui-ecoutent]].
-4. Dans **Settings → Community plugins**, rechercher **Advanced Slides**, installer et activer si nécessaire. Dans le vault de référence, il est déjà présent, version 1.20.0.
-5. Ouvrir la palette de commandes : `Ctrl+P` sur Windows ; `Cmd+P` sur Mac. Rechercher la commande **Advanced Slides: Show slide preview** (ou la commande d’aperçu équivalente de la version installée).
-6. Pour le mode présentateur, ouvrir la présentation dans le navigateur puis appuyer sur `S`. Autoriser la fenêtre secondaire si demandée. Les lignes placées après `notes:` appartiennent aux notes du présentateur.
-7. Si Mermaid ne s’affiche pas, lire le texte explicatif adjacent. Aucun diagramme ne doit être nécessaire pour comprendre une consigne.
+## 1. GitHub Education & Copilot (Étudiants et Enseignant)
 
-## 2. GitHub et Education
-
-1. Créer un compte gratuit sur [GitHub](https://github.com), vérifier votre adresse courriel.
-2. Si vous êtes étudiant, demander la vérification sur [GitHub Education](https://education.github.com/pack) avec les justificatifs demandés. Cette validation peut prendre du temps ; elle n’est pas nécessaire pour la séance 1.
-3. Consulter **Settings → Copilot** pour connaître le plan accessible. Au contrôle du 2 octobre 2026, les étudiants vérifiés peuvent accéder au plan **Copilot Student** ; les comptes non vérifiés peuvent utiliser **Copilot Free**, avec limites. Ne pas supposer un choix illimité de modèles : les plans Free et Student indiquent la sélection automatique. [Documentation des plans](https://docs.github.com/en/copilot/get-started/plans).
-4. Si les crédits sont épuisés, suivre les modifications guidées à la main, ou travailler en binôme avec un compte disponible. Aucun paiement n’est requis pour les applications livrées.
+1. Créer un compte gratuit sur [GitHub](https://github.com) (ou utiliser son compte existant).
+2. **Recommandation pour l'adresse courriel `@hesge.ch` (HEM) :** dans **Settings → Emails**, ajouter son adresse académique HEM comme courriel vérifié sur son compte GitHub principal (inutile de créer un second compte séparé), puis demander la vérification sur [GitHub Education](https://education.github.com/pack) (étudiants) ou [GitHub Teacher](https://education.github.com/teachers) (enseignant).
+3. **Accès à [[copilot]] :**
+   - Les comptes étudiants/enseignants vérifiés reçoivent gratuitement **GitHub Copilot Pro** et un quota mensuel **GitHub Codespaces** (180 heures-cœur/mois).
+   - **Dès la 1re minute (sans attendre la validation Education) :** tout compte GitHub standard dispose déjà de **Copilot Free** (chat et éditions assistées directement dans le navigateur).
 
 > [!important] GitHub n’est pas un GPU gratuit
-> **GitHub Models a été retiré le 30 juillet 2026.** Le catalogue, le playground et l’API de ce service ont fermé. Copilot est un service distinct. Un compte Education ne transforme pas GitHub Pages en serveur de modèles. [Annonce dans la documentation officielle](https://docs.github.com/en/github-models).
+> **GitHub Models a été retiré le 30 juillet 2026.** Pour faire tourner des modèles audio Python (Whisper, CLAP, AST, MusicGen), nous utilisons exclusivement **Google [[colab]]** (`01_hf_audio_10_steps/hf_audio_10_steps_colab.ipynb`) sur GPU T4 gratuit.
 
-## 3. VS Code et l’agent
+## 2. L’éditeur VS Code en ligne : `github.dev` (touche `.`) et Codespaces
 
-1. Installer [Visual Studio Code](https://code.visualstudio.com/download) : Windows Installer ou application macOS.
-2. Dans VS Code, **File → Open Folder…**, ouvrir une copie du dossier `applications/`, nommée `agentic-music-prenom`. Garder ensemble tous ses sous-dossiers.
-3. Accepter la confiance du dossier uniquement pour cette copie de cours que vous inspectez.
-4. Activer les fonctions de chat/Copilot proposées par VS Code et se connecter au compte GitHub. Selon la version, l’interface peut proposer des extensions Copilot ou l’intégration native.
-5. Ouvrir la vue Chat. Utiliser **Ask** pour expliquer, puis **Agent** pour une modification de fichiers si ce mode est accessible dans le compte. Choisir le modèle automatique des plans gratuits.
-6. Ajouter le fichier pertinent au contexte avec **Add Context** / sélection d’un fichier. Pour Écho : `echo/politique.js`. Demander un plan court avant toute édition.
-7. Lire les changements proposés. Garder ou annuler les modifications via la vue des différences. [Chat VS Code](https://code.visualstudio.com/docs/chat/chat-overview).
+Au lieu d'installer VS Code ou Git sur chaque machine :
 
-**GitHub dans le navigateur :** presser `.` dans un dépôt ouvre un éditeur web pratique pour les petits fichiers, mais ce n’est pas un serveur local et il n’offre pas nécessairement tous les outils d’un agent. Pour le micro et les imports, utiliser VS Code desktop + navigateur externe. Codespaces est une option à quotas, pas une exigence.
+1. **VS Code pour le Web (`[[github-dev]]`) — instantané :**
+   - Ouvrir son dépôt sur `https://github.com/PSEUDO/agentic-music-prenom`.
+   - **Appuyer sur la touche `.` (point) du clavier** (ou remplacer `github.com` par `github.dev` dans la barre d'adresse).
+   - VS Code s'ouvre immédiatement dans le navigateur.
+   - Ouvrir le panneau **Copilot Chat** pour poser des questions ou demander des modifications sur `index.html`.
+   - Pour sauvegarder et publier : ouvrir l'onglet **Source Control** (icône de branche à gauche), écrire un message de commit et cliquer **Commit & Push**. Aucune commande terminal n'est requise.
+2. **GitHub Codespaces — lorsque l'on souhaite un serveur de prévisualisation intégré :**
+   - Sur la page du dépôt GitHub, cliquer **Code → Codespaces → Create codespace on main**.
+   - Offre le même VS Code dans le navigateur avec prévisualisation live HTTPS et le mode **Copilot Agent** complet.
 
-## 4. Ouvrir les deux instruments
+## 3. Exécuter les routines Python dans Google Colab
 
-1. Dans VS Code, ouvrir Extensions et chercher **Live Server**, éditeur Ritwick Dey. Installer.
-2. Clic droit sur `index.html` à la racine de la copie → **Open with Live Server**.
-3. Ouvrir l’URL affichée, typiquement `http://127.0.0.1:5500/`, dans Chrome ou Edge récent, ou Safari récent sur Mac. Le port peut varier.
-4. Choisir Écho ; cliquer **Démarrer** ; bouger **Énergie simulée**. Le premier son ne démarre qu’après le clic.
-5. Arrêter ; revenir à l’accueil ; ouvrir Nuage et cliquer **Charger la démo**.
-6. Si la démo ne charge pas, vérifier que `assets/demo-originale.wav` existe et que la page est ouverte via localhost, pas simplement par double-clic sur un HTML.
+Pour la séance sur les modèles audio Hugging Face (`01_hf_audio_10_steps`) :
 
-> [!tip] Variante terminal, facultative
-> Si Node.js est déjà installé, ouvrir le terminal **dans le dossier des applications** :
-> ```bash
-> npx --yes serve .
-> ```
-> Première exécution : téléchargement du petit serveur `serve`. Ouvrir l’URL locale affichée. `Ctrl+C` arrête le serveur. Node.js n’est pas requis avec Live Server.
+1. Ouvrir [Google Colab](https://colab.research.google.com/).
+2. Charger le notebook `01_hf_audio_10_steps/hf_audio_10_steps_colab.ipynb` (depuis GitHub ou par import).
+3. Choisir **Exécution → Modifier le type d'exécution → GPU T4**.
+4. Exécuter les cellules 1 à 10 dans le navigateur. Les poids des modèles restent sur les serveurs de Google.
 
-## 5. Microphone : différence entre systèmes
+## 4. Ouvrir et publier les instruments Web Audio
+
+1. Activer **[[github-pages]]** une seule fois dans le dépôt : **Settings → Pages → Source : Deploy from a branch → `main` / `/(root)` → Save** (ou relier le dépôt à **[[vercel]]**).
+2. À chaque commit effectué dans `github.dev`, l'URL HTTPS (`https://PSEUDO.github.io/...`) se met à jour en quelques secondes.
+3. On peut aussi télécharger un fichier autonome unique (`02_llm_webaudio_vexflow/index.html` ou `03_photo_console_webaudio_matrix/index.html`) et l'ouvrir directement dans Chrome, Firefox ou Safari.
+
+## 5. Microphone dans le navigateur
 
 | Système | Si le micro est refusé |
 |---|---|
-| Windows | **Settings → Privacy & security → Microphone** : autoriser l’accès et les applications desktop ; vérifier ensuite la permission du site dans le navigateur |
-| macOS | **System Settings → Privacy & Security → Microphone** : autoriser le navigateur ; le relancer si demandé ; vérifier aussi la permission du site |
-| Navigateur | Cliquer l’icône des permissions à gauche de l’URL ; choisir le bon micro ; fermer les autres applications qui le monopolisent |
+| Windows | **Settings → Privacy & security → Microphone** : autoriser le navigateur web |
+| macOS | **System Settings → Privacy & Security → Microphone** : autoriser Chrome / Safari / Firefox |
+| Navigateur | Cliquer l’icône à gauche de l’URL (`https://`) et autoriser le microphone |
 
-Les libellés système varient selon version. Le micro web demande un contexte sécurisé : HTTPS ou localhost. Sur un téléphone, `http://192.168…` n’est généralement pas un contexte sécurisé ; utiliser l’URL HTTPS publiée. Source : [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+Le microphone web exige un contexte sécurisé (`https://` sur GitHub Pages, Vercel ou Google Colab). Tous nos instruments (Écho, Nuage, Colab 01, Photo-Console 03) incluent un générateur ou son de démonstration intégré pour jouer même sans microphone.
 
-Si l’accès reste impossible, Écho possède un curseur de repli et Nuage une démo locale. La participation ne dépend pas du microphone.
+## 6. Obsidian (consultation du cours et des slides)
 
-## 6. Git local, facultatif pour le premier rendu
+Pour consulter le vault localement ou projeter les présentations **Advanced Slides** en classe : ouvrir le dossier `cursos/agentic music` dans [Obsidian](https://obsidian.md/download) et lancer **Advanced Slides: Show slide preview** (`Cmd+P` / `Ctrl+P`), puis appuyer sur `S` pour les notes de présentation.
 
-Pour versionner avec les commandes du cours, installer [Git](https://git-scm.com/downloads) sur Windows. Sur Mac, utiliser un installateur proposé ou les outils en ligne de commande Apple lorsque le système le demande. GitHub Desktop constitue une alternative graphique sur les deux systèmes. L’upload par navigateur reste possible.
-
-> [!info] Vérifier Git dans le terminal intégré
-> ```bash
-> git --version
-> ```
-> Résultat attendu : un numéro de version. « Command not found » indique que Git manque ou que VS Code doit être relancé.
-
-Pour publier, suivre [[Publication - GitHub Pages et Vercel]]. L’enseignant n’a pas à installer LilyPond, un moteur GPU ou une API payante avant la séance 1.

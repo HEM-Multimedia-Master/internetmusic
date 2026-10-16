@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 07 — Granular Synthesis: Microsound Clouds</title>
+<style>
+  body { margin: 0; background: #161616; color: #dcdcdc; font: 12px/1.5 ui-monospace, monospace; display: grid; place-items: center; height: 100vh; }
+  .box { background: #212121; border: 1px solid #383838; padding: 12px; width: 520px; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+  input[type="range"] { width: 320px; accent-color: #ff9900; }
+  button { background: #292929; color: #dcdcdc; border: 1px solid #383838; padding: 6px 12px; font: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="row">
+    <span>STEP 07 // GRANULAR SYNTHESIS (BUFFER + ENVELOPE)</span>
+    <button id="btnStart">START CLOUD</button>
+  </div>
+  <div class="row">
+    <label>1. BUFFER POSITION (<span id="lblPos">0.35</span>)</label>
+    <input type="range" id="rngPos" min="0" max="1" step="0.01" value="0.35">
+  </div>
+  <div class="row">
+    <label>2. GRAIN DURATION S (<span id="lblDur">0.12</span>)</label>
+    <input type="range" id="rngDur" min="0.02" max="0.35" step="0.01" value="0.12">
+  </div>
+  <div class="row">
+    <label>3. PLAYBACK PITCH (<span id="lblRate">1.00</span>)</label>
+    <input type="range" id="rngRate" min="0.4" max="2.2" step="0.05" value="1.00">
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * INTERNET MUSIC — STEP 07: GRANULAR SYNTHESIS (MICROSOUND SCHEDULING)
+ * Concepts: [[granular-synthesis]], [[AudioBuffer]], [[callback]], Envelope
+ * Principle: Slice an AudioBuffer into tiny 20-350ms grains, shape each grain
+ *            with an attack/release envelope, and trigger a stream of grains.
+ * ============================================================================ */
+
+let ctx = null;
+let sourceBuffer = null;
+
+// 1. Fill a 4-second AudioBuffer with an evolving chord so no external WAV is needed
+function buildChordBuffer(context) {
+  const sr = context.sampleRate;
+  const buf = context.createBuffer(1, sr * 4, sr);
+  const data = buf.getChannelData(0);
+  const notes = [110, 164.8, 220, 277.2, 329.6, 440];
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sr;
+    // Slowly crossfade across notes over the 4-second buffer
+    const noteIdx = Math.min(notes.length - 1, Math.floor((t / 4) * notes.length));
+    const freq = notes[noteIdx];
+    data[i] = Math.sin(2 * Math.PI * freq * t) * 0.4 + Math.sin(2 * Math.PI * freq * 1.5 * t) * 0.2;
+  }
+  return buf;
+}
+
+// 2. Spawn a single micro-grain from sourceBuffer at current slider settings
+function spawnGrain() {
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const pos = parseFloat(document.getElementById('rngPos').value);
+  const dur = parseFloat(document.getElementById('rngDur').value);
+  const rate = parseFloat(document.getElementById('rngRate').value);
+
+  const grain = ctx.createBufferSource();
+  grain.buffer = sourceBuffer;
+  grain.playbackRate.value = rate;
+
+  // Window envelope to avoid clicks at grain start and end
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, now);
+  env.gain.linearRampToValueAtTime(0.35, now + dur * 0.5);
+  env.gain.linearRampToValueAtTime(0.0001, now + dur);
+
+  // Compute start offset in seconds + tiny random jitter (spray)
+  const offset = Math.max(0, Math.min(3.5, pos * 3.5 + (Math.random() - 0.5) * 0.08));
+
+  grain.connect(env).connect(ctx.destination);
+  grain.start(now, offset, dur);
+  grain.stop(now + dur + 0.02);
+}
+
+// 3. Start the granular clock ([[callback]] firing every 70ms = ~14 grains/sec)
+function startGranular() {
+  if (ctx) return;
+  ctx = new AudioContext();
+  sourceBuffer = buildChordBuffer(ctx);
+  setInterval(spawnGrain, 70);
+  document.getElementById('btnStart').textContent = 'RUNNING';
+}
+
+document.getElementById('btnStart').onclick = startGranular;
+['rngPos', 'rngDur', 'rngRate'].forEach(id => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    startGranular();
+    document.getElementById(id.replace('rng', 'lbl')).textContent = parseFloat(e.target.value).toFixed(2);
+  });
+});
+</script>
+</body>
+</html>
