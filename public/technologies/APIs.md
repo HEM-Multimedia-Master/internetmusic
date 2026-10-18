@@ -1,5 +1,32 @@
 ---
+type: technology
+slug: apis
+alias: API
+aliases: [API, Concept - API]
 status: published
+public: true
+url:
+coverImage:
+tags: [web, interfaces, agentic-music]
+person:
+parent:
+project: internet music
+work:
+source: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+definition: a defined interface that lets a program use functions from another component or service.
+definition_fr: interface définie qui permet à un programme d'utiliser les fonctions d'un autre composant ou service.
+connect:
+  - "[[web audio API]]"
+  - "[[http]]"
+  - "[[REST]]"
+---
+
+An API (application programming interface) is a defined interface that lets a program use the functions of another component or service. In the course instrument, the Web Audio API supplies the browser's oscillators, gains, and buffer playback. An API is not necessarily a remote or paid web service.
+
+<!--lang:fr-->
+Une API (interface de programmation d'application) est une interface définie qui permet à un programme d'utiliser les fonctions d'un autre composant ou service. Dans l'instrument du cours, la Web Audio API fournit les oscillateurs, les gains et la lecture de buffers du navigateur. Une API n'est pas nécessairement un service web distant ou payant.
+<!--/lang-->
+
 ---
 
 #glossary 

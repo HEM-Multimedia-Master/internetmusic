@@ -1,7 +1,35 @@
 ---
+type: technology
+slug: web-audio-api
+alias: API Web Audio
+aliases: [webaudioapi, AudioContext, AudioNode, GainNode, OscillatorNode, BiquadFilterNode, DelayNode, ConvolverNode, AudioBuffer, AudioParam, Concept - Web Audio API]
 status: published
+public: true
+url:
+coverImage:
+tags: [web-audio, js, agentic-music]
+person:
+parent:
+project: internet music
+work:
+source: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+definition: a real-time audio engine built into the browser, where sound modules are wired together inside an AudioContext.
+definition_fr: moteur audio temps réel intégré au navigateur, où des modules sonores sont câblés entre eux à l'intérieur d'un AudioContext.
+connect:
+  - "[[APIs]]"
+  - "[[javascript]]"
+  - "[[sound synthesis]]"
+  - "[[audio matrix and feedback]]"
+  - "[[tonejs]]"
 ---
 
+The Web Audio API is a real-time audio engine built into the browser. Sound modules (AudioNodes: oscillators, filters, delays, gains) are wired together with `.connect()` inside an AudioContext. The main nodes are OscillatorNode (periodic wave), GainNode (volume or FM modulation index), BiquadFilterNode (low-pass cutoff and Q), DelayNode (a few milliseconds to several seconds), ConvolverNode (convolution reverb from an impulse response held in an AudioBuffer), and AudioParam (a parameter modulable at audio rate). An AudioContext never starts sound by itself on page load: the browser requires an explicit user gesture.
+
+<!--lang:fr-->
+La Web Audio API est un moteur audio temps réel intégré au navigateur. Des modules sonores (AudioNodes : oscillateurs, filtres, délais, gains) y sont câblés entre eux par `.connect()` à l'intérieur d'un AudioContext. Les nœuds principaux sont OscillatorNode (onde périodique), GainNode (volume ou indice de modulation FM), BiquadFilterNode (fréquence de coupure passe-bas et Q), DelayNode (de quelques millisecondes à plusieurs secondes), ConvolverNode (réverbération par convolution à partir d'une réponse impulsionnelle stockée dans un AudioBuffer) et AudioParam (paramètre modulable à fréquence audio). Un AudioContext ne démarre jamais le son tout seul au chargement d'une page : le navigateur exige un geste explicite de l'utilisateur.
+<!--/lang-->
+
+---
 
 #technologies 
 # fundamentals

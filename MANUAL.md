@@ -1,70 +1,70 @@
 # MANUAL
 
-## `course`
+## course
 
-`type`
-- `course`
+type
+- course
 
-`required`
-- `title`
-- `id`
+required
+- title
+- id
 
-`optional`
-- `subtitle`
-- `description`
-- `summary`
-- `instructor`
-- `year`
-- `duration`
-- `coverImage`
-- `tags`
-- `public`
+optional
+- subtitle
+- description
+- summary
+- instructor
+- year
+- duration
+- coverImage
+- tags
+- public
 
-## `lesson`
+## lesson
 
-`type`
-- `lesson`
+type
+- lesson
 
-`required`
-- `title`
-- `chapter`
-- `order`
+required
+- title
+- chapter
+- order
 
-`recommended`
-- `summary`
-- `slug`
+recommended
+- summary
+- slug
 
-`optional`
-- `status`
-- `theme`
+optional
+- status
+- theme
 
-## `assignment`
-
-Pendiente.
-
-## `form`
+## assignment
 
 Pendiente.
 
-## `slug`
+## form
+
+Pendiente.
+
+## slug
 
 - customiza la URL
 - se normaliza para web
 - si no existe, se deriva del título o del filename
 
-## `visibility`
+## visibility
 
-- no usar `visibility: enrolled-only` dentro de `cursos/`
-- usar sólo `visibility: public` cuando una note de `cursos/` se quiere promover a `public/`
+- no usar visibility: enrolled-only dentro de cursos/
+- usar sólo visibility: public cuando una note de cursos/ se quiere promover a public/
 
-## `status`
+## status
 
-- sin `status` o `status: published`: visible normal
-- `status: draft`: visible con badge “Material en preparación”
-- `status: nonshown`: reservado para ocultar una note a estudiantes
+- sin status o status: published: visible normal
+- status: draft: visible con badge “Material en preparación”
+- status: nonshown: reservado para ocultar una note a estudiantes
 
-## `theme`
+## theme
 
 - habilita vista slides
-- `theme: zztt` busca `/inc/reveal/css-themes/zztt.css`
+- theme: zztt busca `/inc/reveal/css-themes/zztt.css`
 - también acepta otros nombres o una ruta CSS completa

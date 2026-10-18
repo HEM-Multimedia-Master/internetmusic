@@ -46,14 +46,3 @@ STRUDEL
 python3 -m http.server 8000
 
 
----
-
-jules.lamarche@etu.hesge.ch
-laura.richard@etu.hesge.ch   
-daniel.kalantari@etu.hesge.ch
-yannai.schrire@etu.hesge.ch
-
-Mingije
-
-https://laurarichard.com/
-danielkalantari.com

@@ -1,10 +1,10 @@
 ---
 status: published
 ---
-
+An integrated development environment is a software application that provides comprehensive facilities to computer programmers for software development. An IDE normally consists of at least a source code editor, build automation tools and a debugger
 # editors
 
-After Browser, the code editor is the second most important tool we will use. Actually, there are two types of editors, **local** editors, and **cloud** editors. Those editors are known as Integrated Development Environment (IDE), having a collection of applications used by developers for writing code. \
+After Browser, the code editor is the second most important tool we will use. Actually, there are two types of editors, **local** editors, and **cloud** editors. Those editors are known as Integrated Development Environment (IDE), having a collection of applications used by developers for writing code. 
 
 
 ### What do we need from an IDE?
