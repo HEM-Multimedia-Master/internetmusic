@@ -8,7 +8,7 @@ status: nonshown
 
 Préparation du 2 octobre 2026. Ce document distingue ce qui a été lu, produit et testé de ce qui reste à vérifier sur les appareils de classe.
 
-## Périmètre du vaultttt
+## Périmètre du vault
 
 Le parcours global a inventorié **501 notes Markdown**, soit environ 1,030,708 caractères, hors plugins, dépendances et données de configuration privées. Les textes ont été parcourus pour repérer titres, conventions de classe, références hyperphones, blocs Mermaid et format de notes. Ce travail n’est pas une lecture critique ligne à ligne de chaque note historique.
 
