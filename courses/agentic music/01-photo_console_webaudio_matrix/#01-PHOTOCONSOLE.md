@@ -44,7 +44,7 @@ note: Remind students to add their @hesge.ch email to their existing GitHub acco
 ## Project Goal
 
 1. Pick any **photograph** (mixing desk, synth panel, street object, score, painting)
-2. Crop two interactive control shapes directly out of the image on an HTML5 [[canvas]]:
+2. Crop two interactive control shapes directly out of the image on an HTML5 [[public/technologies/canvas]]:
    - **Circular Rotary Knob**: spins around its own center (`ctx.rotate`)
    - **Polygonal / Rectangular Slider + Vector Arrow**: slides along a drawn direction arrow
 3. Build core [[webaudioapi]] modules: **Additive, Subtractive, FM, Granular, Mic In, Delay, Reverb**
@@ -109,7 +109,7 @@ function drawKnob(ctrl) {
 }
 ```
 
-- Concepts: [[function]], [[parameter]] (`ctrl`), [[canvas]] `clip()`
+- Concepts: [[function]], [[parameter]] (`ctrl`), [[public/technologies/canvas]] `clip()`
 - **Agent prompt**: *"Explain how `g.translate` and `g.rotate` spin only the circular cutout without rotating the rest of the photograph."*
 
 ---

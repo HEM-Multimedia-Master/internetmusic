@@ -43,7 +43,7 @@ note: Rappeler aux étudiants de rattacher leur adresse @hesge.ch à leur compte
 ## Objectif du projet
 
 1. Choisir une **photographie** (console analogique, objet, peinture, façade)
-2. Découper deux types de contrôles directement dans l'image sur un [[canvas]] :
+2. Découper deux types de contrôles directement dans l'image sur un [[public/technologies/canvas]] :
    - **Cercle rotatif (Knob)** : tourne sur lui-même (`ctx.rotate`)
    - **Polygone / rectangle + flèche vectorielle (Slider)** : glisse le long de la flèche
 3. Générer les modules [[webaudioapi]] : **Additif, Soustractif, FM, Granulaire, Mic, Delay, Reverb**
@@ -108,7 +108,7 @@ function drawKnob(ctrl) {
 }
 ```
 
-- Notions : [[function]], [[parameter]] (`ctrl`), masque [[canvas]] `clip()`
+- Notions : [[function]], [[parameter]] (`ctrl`), masque [[public/technologies/canvas]] `clip()`
 - **Prompt à l'agent** : *« Explique comment `g.translate` et `g.rotate` permettent de tourner uniquement le cercle découpé sans tourner toute la photo. »*
 
 ---

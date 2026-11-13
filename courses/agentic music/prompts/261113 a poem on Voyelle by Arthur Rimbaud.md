@@ -7,4 +7,3 @@
 6. to init make a central button named  “commencer”
 7. add a vexflow little staff on the right (transparent background, minimal width) with a random pitch and dynamics for each generation, transparency 50%, but big size. 
 ```
-

@@ -29,10 +29,10 @@ Ce document résume les **12 étapes** permettant de transformer une photographi
 
 1. **`[[01-image-loader]]` — Chargement de la photographie de base**
    - Charger une image via `<input type="file">` et `FileReader`, ou générer la console de démonstration sur le `<canvas>`.
-   - **Concepts :** [[canvas|html]], [[canvas|DOM]], [[variable|variable]] (`const`, `let`), [[canvas|event-listener]].
+   - **Concepts :** [[public/technologies/canvas|html]], [[public/technologies/canvas|DOM]], [[variable|variable]] (`const`, `let`), [[public/technologies/canvas|event-listener]].
 2. **`[[02-circular-knob-crop]]` — Découpe circulaire rotative (Rotary Knob)**
    - Sélectionner un centre `(cx, cy)` et un rayon `r` sur la photo, appliquer un masque circulaire `ctx.arc(...)` + `ctx.clip()`, puis tourner l'image sur son propre axe avec `ctx.translate(cx, cy)` et `ctx.rotate(angle)`.
-   - **Concepts :** [[canvas|canvas]], [[function|function]], [[function|parameter]].
+   - **Concepts :** [[public/technologies/canvas|canvas]], [[function|function]], [[function|parameter]].
 3. **`[[03-polygon-slider-crop]]` — Découpe polygonale/rectangulaire + Flèche vectorielle (Slider)**
    - Définir un polygone à 4 sommets (`poly`) et tracer une flèche de direction $\vec{v} = (vx_1 - vx_0, vy_1 - vy_0)$. Projeter le mouvement de la souris sur la flèche (produit scalaire) pour obtenir une valeur normalisée entre `0.0` et `1.0`.
    - **Concepts :** [[array|array]], [[object|object]], [[function|arrow-function]], [[function|normalization]].
@@ -56,7 +56,7 @@ Ce document résume les **12 étapes** permettant de transformer une photographi
    - **Concepts :** [[sound synthesis|granular-synthesis]], [[web audio API|AudioBuffer]], [[function|callback]].
 9. **`[[09-mic-delay-reverb]]` — Module 5 : Microphone, Delay et Reverb**
    - Entrée micro (`getUserMedia`), ligne à retard (`DelayNode` + filtre d'amortissement) et réverbération à convolution (`ConvolverNode` avec réponse impulsionnelle synthétique).
-   - **Concepts :** [[canvas|getUserMedia]], [[web audio API|DelayNode]], [[web audio API|ConvolverNode]].
+   - **Concepts :** [[public/technologies/canvas|getUserMedia]], [[web audio API|DelayNode]], [[web audio API|ConvolverNode]].
 
 ### Phase C — Matrice Audio Multiplexer & Feedback
 
@@ -81,7 +81,7 @@ Ce document résume les **12 étapes** permettant de transformer une photographi
 Ces prompts sont conçus pour étudier chaque module avec un agent IA dans `[[github-dev]]` tout en reliant le code aux concepts fondamentaux du [[Glossaire - protocole pédagogique|glossaire]].
 
 ### Prompt 01 — Découpe circulaire, rotation & angle de référence (`Knob`)
-- **Concepts liés :** [[variable|variable]], [[function|function]], [[function|parameter]], [[canvas|canvas]], [[canvas|event-listener]], [[function|normalization]]
+- **Concepts liés :** [[variable|variable]], [[function|function]], [[function|parameter]], [[public/technologies/canvas|canvas]], [[public/technologies/canvas|event-listener]], [[function|normalization]]
 
 ```text
 Act as a didactic JavaScript & Web Audio teacher for musicians.
@@ -93,7 +93,7 @@ Explain how our circular rotary knob works in index.html (and photo-console-step
 ```
 
 ### Prompt 02 — Découpe rectangulaire orientée & projection vectorielle (`Slider`)
-- **Concepts liés :** [[array|array]], [[object|object]], [[function|arrow-function]], [[canvas|coordinates]], [[function|normalization]]
+- **Concepts liés :** [[array|array]], [[object|object]], [[function|arrow-function]], [[public/technologies/canvas|coordinates]], [[function|normalization]]
 
 ```text
 Act as a didactic JavaScript teacher for beginner musicians.
@@ -116,7 +116,7 @@ Compare the 4 synthesis engines in our console (photo-console-step04.html to pho
 ```
 
 ### Prompt 04 — Périphériques, Matrice Multiplexer $N \times M$ & Feedback sécurisé
-- **Concepts liés :** [[audio matrix and feedback|multiplexer]], [[audio matrix and feedback|feedback]], [[array|2d-array]], [[web audio API|GainNode]], [[web audio API|DelayNode]], [[web audio API|ConvolverNode]], [[canvas|getUserMedia]]
+- **Concepts liés :** [[audio matrix and feedback|multiplexer]], [[audio matrix and feedback|feedback]], [[array|2d-array]], [[web audio API|GainNode]], [[web audio API|DelayNode]], [[web audio API|ConvolverNode]], [[public/technologies/canvas|getUserMedia]]
 
 ```text
 Act as a cybernetics and Web Audio instrument designer.
