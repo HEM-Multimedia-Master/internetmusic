@@ -10,9 +10,9 @@ tags: [moc, agentic-music]
 1. [[Programme - 10 séances]] — productions, lectures, progression et critères.
 2. [[Installation - Windows et macOS]] — circuit cloud zéro installation (`github.dev`, Copilot Education, Google Colab, Pages/Vercel).
 3. [[classe-01-machines-qui-ecoutent]] — séance 1 Advanced Slides avec `notes:` et [[Atelier 01 - deux applications]].
-4. [[courses/agentic music/01-hf_audio_10_steps/slides_fr|01 — Modèles audio Hugging Face en 10 étapes (FR)]] · [[courses/agentic music/01-hf_audio_10_steps/slides_en|(EN)]] — exécuté sur Google Colab (`01_hf_audio_10_steps/hf_audio_10_steps_colab.ipynb`).
-5. [[courses/agentic music/02-llm_webaudio_vexflow/slides_fr|02 — Modèles de langage gratuits, Web Audio & VexFlow (FR)]] · [[courses/agentic music/02-llm_webaudio_vexflow/slides_en|(EN)]].
-6. [[courses/agentic music/03-photo_console_webaudio_matrix/slides_fr|03 — Photo-Console & Matrice Audio Multiplexer (FR)]] · [[courses/agentic music/03-photo_console_webaudio_matrix/slides_en|(EN)]] et [[Atelier 03 - Photo-Console et Matrice Audio]].
+4. [[draft/stage/01-hf_audio_10_steps/slides_fr|01 — Modèles audio Hugging Face en 10 étapes (FR)]] · [[draft/stage/01-hf_audio_10_steps/slides_en|(EN)]] — exécuté sur Google Colab (`01_hf_audio_10_steps/hf_audio_10_steps_colab.ipynb`).
+5. [[draft/stage/02-llm_webaudio_vexflow/slides_fr|02 — Modèles de langage gratuits, Web Audio & VexFlow (FR)]] · [[draft/stage/02-llm_webaudio_vexflow/slides_en|(EN)]].
+6. [[courses/agentic music/01-photo_console_webaudio_matrix/#01-Photo-Console-fr|03 — Photo-Console & Matrice Audio Multiplexer (FR)]] · [[courses/agentic music/01-photo_console_webaudio_matrix/#01-Photo-Console|(EN)]] et [[Atelier 03 - Photo-Console et Matrice Audio]].
 7. [[Protocole - agentic engineering]] — demander, inspecter, écouter, corriger et versionner.
 8. [[Glossaire - protocole pédagogique]] — définitions FR/EN (IA, JS débutant et Web Audio API).
 9. [[Journal - modèle étudiant]] — intention, interventions de l’agent, décisions et preuves.
