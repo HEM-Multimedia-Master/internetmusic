@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <title>Voyelles — générateur de poème</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Georgia, "Times New Roman", serif;
+      background: #090909;
+      color: #f2efe9;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 280px;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      background: #090909;
+    }
+
+    main {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100svh;
+      place-items: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .intro {
+      width: min(100%, 42rem);
+      animation: arrive 900ms ease-out both;
+    }
+
+    .eyebrow {
+      margin: 0 0 1.25rem;
+      color: #99958e;
+      font: 500 0.72rem/1.4 system-ui, sans-serif;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 11vw, 7rem);
+      font-weight: 400;
+      letter-spacing: -0.07em;
+      line-height: 0.95;
+    }
+
+    .subtitle {
+      margin: 1.5rem 0 0;
+      color: #b4b0aa;
+      font-size: clamp(1rem, 2.4vw, 1.25rem);
+      line-height: 1.6;
+    }
+
+    .palette {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.65rem 1.25rem;
+      margin: 2rem 0 2.4rem;
+      color: #d3cfc8;
+      font: 0.8rem/1.5 system-ui, sans-serif;
+    }
+
+    .palette span {
+      white-space: nowrap;
+    }
+
+    .palette strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button {
+      min-width: 10rem;
+      border: 1px solid #77736d;
+      border-radius: 999px;
+      padding: 0.9rem 2rem;
+      background: transparent;
+      color: #f2efe9;
+      cursor: pointer;
+      font: 500 1rem/1 system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      border-color: #f2efe9;
+      background: #f2efe9;
+      color: #090909;
+    }
+
+    button:focus-visible {
+      outline: 2px solid #f2efe9;
+      outline-offset: 4px;
+    }
+
+    .stage {
+      display: grid;
+      width: 100%;
+      min-height: calc(100vh - 4rem);
+      min-height: calc(100svh - 4rem);
+      place-items: center;
+    }
+
+    .word {
+      max-width: 100%;
+      margin: 0;
+      overflow-wrap: anywhere;
+      font-size: clamp(4rem, 19vw, 16rem);
+      font-weight: 400;
+      letter-spacing: -0.08em;
+      line-height: 0.95;
+      animation: word-in 220ms ease-out both;
+    }
+
+    .fermata {
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    .double-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(0.8rem, 3vw, 2rem);
+      width: 100%;
+      height: 100%;
+    }
+
+    .double-bar span {
+      display: block;
+      width: clamp(0.55rem, 2vw, 1.1rem);
+      height: clamp(8rem, 38vh, 20rem);
+      background: currentColor;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(0.7rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes word-in {
+      from { opacity: 0; transform: translateY(0.2em); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <section class="intro" id="intro" aria-labelledby="title">
+      <p class="eyebrow">Arthur Rimbaud · 1871</p>
+      <h1 id="title">Voyelles</h1>
+      <p class="subtitle">Un poème de mots, de couleurs et de son.</p>
+      <div class="palette" aria-label="Correspondance des voyelles">
+        <span><strong>A</strong> · noir</span>
+        <span><strong>E</strong> · blanc</span>
+        <span><strong>I</strong> · rouge</span>
+        <span><strong>U</strong> · vert</span>
+        <span><strong>O</strong> · bleu</span>
+      </div>
+      <button id="start" type="button">commencer</button>
+    </section>
+    <section class="stage" id="stage" aria-label="Poème généré" hidden>
+      <p class="word" id="word" aria-live="polite"></p>
+      <div class="double-bar" id="ending" role="img" aria-label="Fin du poème" hidden>
+        <span></span><span></span>
+      </div>
+    </section>
+    <p class="sr-only" id="status" role="status" aria-live="polite"></p>
+  </main>
+  <script>
+    const palette = {
+      A: { background: "#080808", foreground: "#f7f4ed", frequency: 220 },
+      E: { background: "#f2efe9", foreground: "#171615", frequency: 330 },
+      I: { background: "#dc2638", foreground: "#fff8f5", frequency: 440 },
+      U: { background: "#16864b", foreground: "#f4fff7", frequency: 550 },
+      O: { background: "#2457c5", foreground: "#f5f8ff", frequency: 660 }
+    };
+
+    const wordsByVowel = {
+      A: ["Aube", "Alchimie", "Animal", "Ardeur", "Ancre", "Astre", "Azalée"],
+      E: ["Écume", "Étoile", "Éclat", "Énigme", "Éden", "Élan", "Épure"],
+      I: ["Iris", "Ivresse", "Infini", "Incendie", "Image", "Île", "Silence"],
+      U: ["Univers", "Lune", "Murmure", "Fugue", "Brume", "Pluie", "Lueur"],
+      O: ["Ombre", "Océan", "Orage", "Oiseau", "Onde", "Opale", "Horizon"]
+    };
+
+    const intro = document.querySelector("#intro");
+    const stage = document.querySelector("#stage");
+    const wordElement = document.querySelector("#word");
+    const ending = document.querySelector("#ending");
+    const startButton = document.querySelector("#start");
+    const status = document.querySelector("#status");
+    let audioContext;
+    let filter;
+    let volume;
+
+    function randomInteger(minimum, maximum) {
+      return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+    }
+
+    function wait(milliseconds) {
+      return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+    }
+
+    function startSound() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) {
+        status.textContent = "Le son Web Audio n’est pas disponible dans ce navigateur.";
+        return false;
+      }
+
+      try {
+        audioContext = new AudioContext();
+        const buffer = audioContext.createBuffer(1, audioContext.sampleRate * 2, audioContext.sampleRate);
+        const samples = buffer.getChannelData(0);
+        for (let index = 0; index < samples.length; index += 1) {
+          samples[index] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioContext.createBufferSource();
+        noise.buffer = buffer;
+        noise.loop = true;
+        filter = audioContext.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = palette.A.frequency;
+        filter.Q.value = 0.7;
+        volume = audioContext.createGain();
+        volume.gain.value = 0.025;
+        noise.connect(filter);
+        filter.connect(volume);
+        volume.connect(audioContext.destination);
+        noise.start();
+        return true;
+      } catch (error) {
+        console.error("Unable to start Web Audio.", error);
+        status.textContent = "Le son n’a pas pu démarrer. Vérifiez les réglages audio de votre navigateur.";
+        return false;
+      }
+    }
+
+    function setWord(word) {
+      const firstVowel = word.normalize("NFD").toUpperCase().match(/[AEIOU]/)?.[0] || "A";
+      const colors = palette[firstVowel];
+      wordElement.textContent = word;
+      wordElement.style.animation = "none";
+      void wordElement.offsetWidth;
+      wordElement.style.animation = "";
+      document.body.style.backgroundColor = colors.background;
+      document.body.style.color = colors.foreground;
+      if (filter && audioContext) {
+        filter.frequency.setTargetAtTime(colors.frequency, audioContext.currentTime, 0.08);
+      }
+    }
+
+    function setFermata(active) {
+      document.body.classList.toggle("fermata", active);
+      if (volume && audioContext) {
+        volume.gain.setTargetAtTime(active ? 0 : 0.025, audioContext.currentTime, 0.01);
+      }
+      if (active) {
+        status.textContent = "Fermata : silence.";
+      }
+    }
+
+    async function generatePoem() {
+      startButton.disabled = true;
+      intro.hidden = true;
+      stage.hidden = false;
+      ending.hidden = true;
+      status.textContent = "Le poème commence.";
+      startSound();
+
+      const count = randomInteger(5, 15);
+      const durations = Array.from({ length: count }, () => randomInteger(100, 3000));
+      const totalDuration = durations.reduce((sum, duration) => sum + duration, 0);
+      const pauseAt = Math.random() * Math.min(10000, totalDuration);
+      const sequence = Array.from({ length: count }, () => {
+        const vowel = Object.keys(wordsByVowel)[randomInteger(0, 4)];
+        const options = wordsByVowel[vowel];
+        return options[randomInteger(0, options.length - 1)];
+      });
+
+      let elapsed = 0;
+      let paused = false;
+
+      for (let index = 0; index < sequence.length; index += 1) {
+        if (!paused && pauseAt <= elapsed) {
+          setFermata(true);
+          await wait(1000);
+          setFermata(false);
+          elapsed += 1000;
+          paused = true;
+        }
+
+        setWord(sequence[index]);
+        const duration = durations[index];
+        if (!paused && pauseAt < elapsed + duration) {
+          const beforePause = pauseAt - elapsed;
+          await wait(beforePause);
+          setFermata(true);
+          await wait(1000);
+          setFermata(false);
+          await wait(duration - beforePause);
+          elapsed += duration + 1000;
+          paused = true;
+        } else {
+          await wait(duration);
+          elapsed += duration;
+        }
+      }
+
+      if (!paused) {
+        setFermata(true);
+        await wait(1000);
+        setFermata(false);
+      }
+
+      document.body.classList.remove("fermata");
+      document.body.style.backgroundColor = "#090909";
+      document.body.style.color = "#f2efe9";
+      wordElement.hidden = true;
+      ending.hidden = false;
+      status.textContent = "Fin du poème.";
+      if (audioContext) {
+        await audioContext.close();
+        audioContext = undefined;
+        filter = undefined;
+        volume = undefined;
+      }
+    }
+
+    startButton.addEventListener("click", generatePoem);
+  </script>
+</body>
+</html>

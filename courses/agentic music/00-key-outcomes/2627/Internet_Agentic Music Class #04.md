@@ -16,6 +16,12 @@
     4. **Time Organization** (e.g., random intervals, pauses)
     5. **Sound Output** (e.g., Web Audio API, specific filters/pitches)
     6. **Termination/Decision** (e.g., end after 15 words with a double bar) 
+    7. add  **music notation** capabilities 
+
+#### example
+
+![[261113 a poem on Voyelle by Arthur Rimbaud]]
+
 
 ## Technical Concepts Covered
 
