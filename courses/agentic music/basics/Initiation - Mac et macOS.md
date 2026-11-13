@@ -12,17 +12,17 @@ Note : « OS X » est l'ancien nom du système. Depuis 2016 il s'appelle macOS ;
 
 ## 0. Symboles des touches — Key symbols
 
-| Français | English | Symbole |
-| --- | --- | --- |
-| Commande (cmd) | Command (cmd) | ==⌘== |
-| Option (alt) | Option (alt) | ==⌥== |
-| Contrôle (ctrl) | Control (ctrl) | ==⌃== |
-| Majuscule | Shift | ==⇧== |
-| Fonction / Globe | Function / Globe | ==fn 🌐== |
-| Échappement | Escape | ==⎋ Échap== |
-| Effacer (arrière) | Delete (backspace) | ==⌫== |
-| Retour / Entrée | Return | ==↩== |
-| Tabulation | Tab | ==⇥== |
+| Français          | English            | Symbole     |
+| ----------------- | ------------------ | ----------- |
+| Commande (cmd)    | Command (cmd)      | ==⌘==       |
+| Option (alt)      | Option (alt)       | ==⌥==       |
+| Contrôle (ctrl)   | Control (ctrl)     | ==⌃==       |
+| Majuscule         | Shift              | ==⇧==       |
+| Fonction / Globe  | Function / Globe   | ==fn 🌐==   |
+| Échappement       | Escape             | ==⎋ Échap== |
+| Effacer (arrière) | Delete (backspace) | ==⌫==       |
+| Retour / Entrée   | Return             | ==↩==       |
+| Tabulation        | Tab                | ==⇥==       |
 
 Règle d'or : sur Mac, ⌘ remplace presque toujours le Ctrl de Windows (copier = ⌘ C, pas Ctrl C).
 Rule of thumb: on Mac, ⌘ replaces Windows Ctrl in almost every case.

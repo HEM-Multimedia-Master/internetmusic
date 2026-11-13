@@ -22,3 +22,20 @@ Commencer par [[agentic music MOC]], puis [[Programme - 10 séances]] et [[class
 Deux ouvrages structurent l’atelier : Maya Ackerman, *Creative Machines: AI, Art & Us* (2026), et Emily K. Johnson / Anastasia Salter, *Critical Making in the Age of AI* (2025). Voir [[Lectures - concepts et exercices]] pour les pages et les adaptations.
 
 La séance 1 est rédigée et accompagnée de deux applications. Les séances 2–10 sont planifiées ; leurs présentations complètes restent à rédiger. Les dates seront fixées avec l’enseignant.
+
+
+## Agenda
+
+13/11/2026  (4) (30/10 class goes to 19/02/2027 ) *
+20/11/2026 (5) * (online!)
+04/12/2026 (6)
+11/12/2026 (7)
+15/01/2027 (8)
+19/02/2027 (9)  (new date)
+05/03/2027 (10)
+19/03/2027 (11)
+09/04/2027 (12)
+23/04/2027 (13)
+07/05/2027 (14)
+21/05/2027 (15)
+04/06/2027 (16)
